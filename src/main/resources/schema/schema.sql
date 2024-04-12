@@ -12,7 +12,7 @@ create table Otps(
     expiration interval default '2 minutes',
     verify boolean default false,
     user_id uuid not null ,
-    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 create table categories(
@@ -20,16 +20,17 @@ create table categories(
     name varchar(200) not null,
     description varchar(200) not null ,
     user_id uuid,
-    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE Expenses(
-    id  uuid PRIMARY KEY,
-    amount INT not null ,
-    description varchar(200) not null ,
-    date date not null ,
-    user_id uuid,
+CREATE TABLE Expenses
+(
+    id          uuid PRIMARY KEY,
+    amount      INT          not null,
+    description varchar(200) not null,
+    date        date         not null,
+    user_id     uuid,
     category_id uuid,
-    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES categories (category_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories (category_id) ON UPDATE CASCADE ON DELETE CASCADE
 );

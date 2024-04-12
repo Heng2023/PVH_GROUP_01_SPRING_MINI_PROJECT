@@ -22,5 +22,5 @@ public interface CategoryRepository {
             @Result(property = "description", column = "description"),
             @Result(property = "userId",column = "user_id")
     })
-    List<Category> getAllCategory(Integer page, Integer size);
+    List<Category> getAllCategories(Integer page, Integer size);
 }

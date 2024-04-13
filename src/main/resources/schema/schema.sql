@@ -2,7 +2,7 @@ create table users(
     user_id uuid primary key,
     email varchar(200) not null UNIQUE,
     password varchar(200) not null,
-    profile_image varchar(200) not null
+    profile_image varchar(200)
 );
 
 create table otps(
@@ -18,15 +18,15 @@ create table otps(
 create table categories(
     category_id uuid primary key,
     name varchar(200) not null,
-    description text not null ,
+    description text ,
     user_id uuid not null ,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE expenses(
-    id  uuid PRIMARY KEY,
+    expense_id  uuid PRIMARY KEY,
     amount decimal not null ,
-    description text not null ,
+    description text ,
     date date not null ,
     user_id uuid not null,
     category_id uuid not null,

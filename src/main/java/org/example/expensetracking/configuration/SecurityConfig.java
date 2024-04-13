@@ -41,9 +41,12 @@ public class SecurityConfig{
         http
                 .cors(withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auths/**","/v3/api-docs/**",
+                        .requestMatchers("/api/v1/files/**").permitAll()
+                        .requestMatchers("/api/v1/auths/register").permitAll()
+                        .requestMatchers("/auths/**",
+                                "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/index.html"
+                                "/swagger-ui/index.html"
                         ).permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/user").hasAnyRole("USER", "ADMIN")

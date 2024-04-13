@@ -15,6 +15,6 @@ public class Otp {
     private String otpCode;
     private Date issuedAt;
     private Date expiration;
-    private boolean verify;
+    private String verify;
     private UUID userId;
 }

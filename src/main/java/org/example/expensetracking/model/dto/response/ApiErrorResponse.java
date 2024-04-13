@@ -28,7 +28,7 @@ public class ApiErrorResponse {
 //          ErrorResponse errorResponse = new ErrorResponse(
 //                "about:blank",
 //                "Internal Server Error",
-//                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+//                HttpStatus.INTERNAL_SERVER_ERROR.value(),"500",
 //                "/api/v1/attendees/" + id,
 //                new Date(),
 //                errorMap

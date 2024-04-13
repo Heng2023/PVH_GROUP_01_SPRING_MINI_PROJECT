@@ -2,20 +2,22 @@ package org.example.expensetracking.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ApiResponse <T> {
     private String type;
     private String title;
-    private Integer status;
+    private HttpStatus status;
+    private Integer code;
     private String instance;
     private Date timestamp;
 

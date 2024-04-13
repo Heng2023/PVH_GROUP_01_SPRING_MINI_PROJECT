@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExpenseRequest {
-    private int amount;
+    private double amount;
     private String description;
     private Date date;
     private UUID categoryId;

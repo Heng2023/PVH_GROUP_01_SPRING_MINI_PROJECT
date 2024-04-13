@@ -1,2 +1,20 @@
-package org.example.expensetracking.service.serviceimpl;public class MailSenderServiceImpl {
+package org.example.expensetracking.service.serviceimpl;
+
+import org.example.expensetracking.service.MailSenderService;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+public class MailSenderServiceImpl implements MailSenderService {
+    private JavaMailSender javaMailSender;
+
+    @Override
+    public void sendEmail(String toEmail, String otp ) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Your OTP for Email Verification");
+        message.setText("Your OTP is: " + otp);
+        javaMailSender.send(message);
+    }
 }

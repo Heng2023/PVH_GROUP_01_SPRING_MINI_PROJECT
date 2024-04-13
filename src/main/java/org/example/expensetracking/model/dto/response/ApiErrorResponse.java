@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -15,7 +14,8 @@ import java.util.Map;
 public class ApiErrorResponse {
     private String type;
     private String title;
-    private int status;
+    private HttpStatus status;
+    private Integer code;
     private String instance;
     private Date timestamp;
     private Map<String, String> errors;

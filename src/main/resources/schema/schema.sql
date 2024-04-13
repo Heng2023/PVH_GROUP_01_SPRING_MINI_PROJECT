@@ -7,7 +7,7 @@ create table users(
 
 create table otps(
     otp_id uuid primary key,
-    otp_code int not null ,
+    otp_code varchar(255) not null ,
     issued_at timestamp not null,
     expiration timestamp not null ,
     verify boolean not null ,
@@ -25,7 +25,7 @@ create table categories(
 
 CREATE TABLE expenses(
     id  uuid PRIMARY KEY,
-    amount int not null ,
+    amount decimal not null ,
     description text not null ,
     date date not null ,
     user_id uuid not null,

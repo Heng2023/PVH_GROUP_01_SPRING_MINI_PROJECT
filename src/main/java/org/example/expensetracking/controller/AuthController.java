@@ -28,7 +28,8 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         String otp = otpService.generateOTP(6);
-        mailSenderService.sendEmail("sokheng.tey03@gmail.com",otp);
+        String userEmail = registerRequest.getEmail(); // Extract email from registerRequest
+        mailSenderService.sendEmail(userEmail, otp); // Send email to the user's email address
         AppUserDTO appUserDTO = appUserService.createUser(registerRequest);
         return ResponseEntity.ok(ApiResponse.builder().title("Successfully register").status(HttpStatus.CREATED).code(201).payload(appUserDTO).build());
     }

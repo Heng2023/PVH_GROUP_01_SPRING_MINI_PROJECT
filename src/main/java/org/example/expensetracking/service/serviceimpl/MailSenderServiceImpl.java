@@ -1,13 +1,19 @@
 package org.example.expensetracking.service.serviceimpl;
 
 import org.example.expensetracking.service.MailSenderService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MailSenderServiceImpl implements MailSenderService {
-    private JavaMailSender javaMailSender;
+
+    private final JavaMailSender javaMailSender;
+
+    public MailSenderServiceImpl(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
 
     @Override
     public void sendEmail(String toEmail, String otp ) {

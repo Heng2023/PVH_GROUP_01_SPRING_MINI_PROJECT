@@ -17,25 +17,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper = new ModelMapper();
-    private final PasswordEncoder passwordEncoder;
-
-    public UserServiceImpl(UserRepository userRepository, OtpRepository otpRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    }
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findUserByEmail(email);
+        System.out.println(user);
+        return new CustomUserDetails(user);
     }
 
     @Override
     public AppUserDTO createUser(RegisterRequest registerRequest) {
-        String passwordEncode = passwordEncoder.encode(registerRequest.getPassword());
-        registerRequest.setPassword(passwordEncode);
-        User appUser = userRepository.createUser(registerRequest);
-        return modelMapper.map(appUser, AppUserDTO.class);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(email);
-        return new CustomUserDetails(user);
+        return userRepository.saveUser(registerRequest);
     }
 }

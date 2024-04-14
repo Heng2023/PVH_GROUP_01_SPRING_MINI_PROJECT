@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class ApiErrorResponse {
     private String type;
-    private String title;
+    private String message;
     private HttpStatus status;
     private Integer code;
     private String instance;

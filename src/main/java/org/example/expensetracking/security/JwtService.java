@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Component
 public class JwtService {
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; //5 hour
-    public static final String SECRET = "5465464bcd3967c1859c1c9eeb365dc8ebd62e782dbfa7e094b6e40404dcdb8b15f4bcd3967c1859c1c9eeb365dc8ebd62e782dbfa7e094b6e40404dcdb8b15f";
+    public static final String SECRET = "3445f76b8b7c0ff73d2f38a33a6c3b9b59b9d5e0ff9460b9935ab56dbc888c64";
 
     private String createToken(Map<String, Object> claim, String subject) {
         return Jwts.builder()
@@ -25,7 +25,7 @@ public class JwtService {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS256, getSignKey()).compact();
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
     private Key getSignKey() {
@@ -38,37 +38,31 @@ public class JwtService {
         return createToken(claims, userDetails.getUsername());
     }
 
-    //3. retrieving any information from token we will need the secret key
-    private Claims extractALlClaim(String token) {
-
-        return Jwts.parser()
-                .setSigningKey(SECRET)
+    private Claims extractAllClaim(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    //4. extract a specific claim from the JWT token’s claims.
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractALlClaim(token);
+        final Claims claims = extractAllClaim(token);
         return claimsResolver.apply(claims);
     }
 
-    //5. retrieve username from jwt token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    //6. retrieve expiration date from jwt token
     public Date extractExpirationDate(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    //7. check expired token
     private Boolean isTokenExpired(String token) {
         return extractExpirationDate(token).before(new Date());
     }
 
-    //8. validate token
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));

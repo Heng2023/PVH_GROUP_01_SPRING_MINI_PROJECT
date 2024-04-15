@@ -10,7 +10,7 @@ public interface UserRepository {
     @Results(id = "AppUserMapping", value = {
             @Result(property = "profileImage", column = "profile_image")
     })
-    @Select("""        
+    @Select("""
         INSERT INTO users  VALUES (DEFAULT,#{user.email} , #{user.password},#{user.profileImage}) RETURNING *
     """)
     AppUserDTO saveUser(@Param("user") RegisterRequest registerRequest);

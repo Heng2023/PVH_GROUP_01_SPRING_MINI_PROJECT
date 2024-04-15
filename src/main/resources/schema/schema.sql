@@ -10,7 +10,7 @@ create table otps(
     otp_code varchar(255) not null ,
     issued_at timestamp not null,
     expiration timestamp not null ,
-    verify boolean not null ,
+    verify boolean default false not null ,
     user_id uuid not null ,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );

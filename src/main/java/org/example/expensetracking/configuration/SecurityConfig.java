@@ -28,10 +28,12 @@ public class SecurityConfig  {
     private final JwtAuthEntrypoint jwtAuthEntrypoint;
 
     @Bean
-    public AuthenticationManager authenticationManager() throws Exception {
+    public AuthenticationManager authenticationManager() {
         return authentication -> {
             UserDetails userDetails = userService.loadUserByUsername((String) authentication.getPrincipal());
-            if (!passwordEncoder.matches((CharSequence) authentication.getCredentials(), userDetails.getPassword())) {
+            boolean passwordMatches = passwordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword());
+            System.out.println("Password Matches: " + passwordMatches); // Log the comparison result
+            if (!passwordMatches) {
                 throw new BadCredentialsException("Invalid password");
             }
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

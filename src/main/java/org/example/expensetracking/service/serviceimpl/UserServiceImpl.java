@@ -1,17 +1,13 @@
 package org.example.expensetracking.service.serviceimpl;
 
 import org.example.expensetracking.model.CustomUserDetails;
-import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
 import org.example.expensetracking.model.dto.response.AppUserDTO;
-import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

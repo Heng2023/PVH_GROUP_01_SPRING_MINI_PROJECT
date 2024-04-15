@@ -14,6 +14,8 @@ public class BeanConfig {
 
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        System.out.println("BCryptPasswordEncoder Instance: " + encoder); // Log a hash to ensure it's the same instance
+        return encoder;
     }
 }

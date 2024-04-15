@@ -50,6 +50,7 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
+        System.out.println("Encoded Password: " + encodedPassword); // Log the encoded password
         registerRequest.setPassword(encodedPassword);
         AppUserDTO appUserDTO = userService.createUser(registerRequest);
 
@@ -79,11 +80,13 @@ public class AuthController {
             System.out.println("UserDetail is not null");
             System.out.println("Password : " + password);
             System.out.println("UserDetail password : " + userDetails.getPassword());
-            System.out.println(passwordEncoder.matches(password, userDetails.getPassword()));
+            boolean passwordMatches = passwordEncoder.matches(password, userDetails.getPassword());
+            System.out.println("Password Matches: " + passwordMatches); // Log the comparison result
             if (!passwordEncoder.matches(password, userDetails.getPassword())) {
                 throw new BadCredentialsException("Invalid password");
             }
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            System.out.println("Heng");
         } catch (DisabledException e) {
             throw new Exception("User disabled", e);
         } catch (BadCredentialsException e) {

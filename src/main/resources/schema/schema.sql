@@ -2,7 +2,7 @@ create table users(
     user_id uuid  default gen_random_uuid()  primary key,
     email varchar(200) not null UNIQUE,
     password varchar(200) not null,
-    profile_image varchar(200)
+    profile_image varchar(200) not null
 );
 
 create table otps(

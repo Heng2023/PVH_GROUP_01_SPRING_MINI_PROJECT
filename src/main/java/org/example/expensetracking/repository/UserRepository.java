@@ -7,11 +7,12 @@ import org.example.expensetracking.model.dto.response.AppUserDTO;
 
 @Mapper
 public interface UserRepository {
-    @Results(id = "AppUserMapping", value = {
+    @Results(id = "UserMapping", value = {
+            @Result(property = "userId", column = "user_id"), // Map userId column to userId property
             @Result(property = "profileImage", column = "profile_image")
     })
     @Select("""
-        INSERT INTO users  VALUES (DEFAULT,#{user.email} , #{user.password},#{user.profileImage}) RETURNING *
+        INSERT INTO users  VALUES (DEFAULT,#{user.email} , #{user.password},#{user.profileImage}) RETURNING user_id, *
     """)
     AppUserDTO saveUser(@Param("user") RegisterRequest registerRequest);
 

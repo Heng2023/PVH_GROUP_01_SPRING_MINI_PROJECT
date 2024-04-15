@@ -1,21 +1,35 @@
 package org.example.expensetracking.configuration;
 
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.modelmapper.ModelMapper;
+import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@Configuration
+import java.util.UUID;
+
+@org.springframework.context.annotation.Configuration
 public class BeanConfig {
+
     @Bean
-    ModelMapper modelMapper() {
+    public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 
     @Bean
-    BCryptPasswordEncoder passwordEncoder() {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        System.out.println("BCryptPasswordEncoder Instance: " + encoder); // Log a hash to ensure it's the same instance
-        return encoder;
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public ConfigurationCustomizer mybatisConfigurationCustomizer() {
+        return new ConfigurationCustomizer() {
+            @Override
+            public void customize(Configuration configuration) {
+                TypeHandlerRegistry registry = configuration.getTypeHandlerRegistry();
+                registry.register(UUID.class, new UUIDTypeHandler());
+            }
+        };
     }
 }

@@ -2,12 +2,19 @@ package org.example.expensetracking.controller;
 
 import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
+import org.example.expensetracking.exceptionhandler.AuthenticationException;
+import org.example.expensetracking.exceptionhandler.BlankFieldException;
+import org.example.expensetracking.exceptionhandler.RegistrationException;
+import org.example.expensetracking.exceptionhandler.UserNotFoundException;
+import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.LoginRequest;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.model.dto.response.AuthResponse;
+import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.security.JwtService;
+import org.example.expensetracking.service.FileService;
 import org.example.expensetracking.service.MailSenderService;
 import org.example.expensetracking.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -20,6 +27,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.util.Date;
+
 @RequestMapping("/api/v1/auths")
 @RestController
 @AllArgsConstructor
@@ -28,9 +40,15 @@ public class AuthController {
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final FileService fileService;
 
     private final MailSenderService mailSenderService;
 
+    private boolean isValidEmail(String email) {
+        // Simple email format validation
+        return email != null && email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+    }
 
     @PutMapping("/verify")
     public String verify() {
@@ -48,49 +66,96 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws BadRequestException {
+        // Validate registerRequest...
+        if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            throw new RegistrationException("Password and Confirm Password do not match");
+        }
+
+        if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty() ||
+                registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
+            throw new RegistrationException("One or more fields are blank");
+        }
+
+        // Check if email format is valid
+        if (!isValidEmail(registerRequest.getEmail())) {
+            throw new BadRequestException("Invalid email format");
+        }
+
+        // Check if the email is already registered
+        User existingUser = userRepository.findUserByEmail(registerRequest.getEmail());
+        if (existingUser != null) {
+            throw new RegistrationException("Email is already registered");
+        }
+
+        // Check if profile image is provided and exists
+        if (registerRequest.getProfileImage() != null && !registerRequest.getProfileImage().isEmpty()) {
+            try {
+                fileService.getFileByFileName(registerRequest.getProfileImage());
+            } catch (FileNotFoundException e) {
+                throw new BadRequestException("Profile image does not exist");
+            } catch (IOException e) {
+                throw new RuntimeException("Error occurred while checking profile image", e);
+            }
+        } else {
+            throw new BadRequestException("Profile image cannot be blank");
+        }
+
+        // If all validations pass, proceed with registration
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
-        System.out.println("Encoded Password: " + encodedPassword); // Log the encoded password
         registerRequest.setPassword(encodedPassword);
         AppUserDTO appUserDTO = userService.createUser(registerRequest);
 
-        ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder().message("Successfully Registered").code(201).
-                status(HttpStatus.CREATED).payload(appUserDTO).build();
-        System.out.println(appUserDTO);
-        return ResponseEntity.ok(response);
-    }
+        // Return ApiResponse for successful registration
+        ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder()
+                .type("about:blank")
+                .message("Successfully Registered")
+                .code(HttpStatus.CREATED.value())
+                .status(HttpStatus.CREATED)
+                .instance("/api/v1/venues/" + appUserDTO.getUserId())
+                .timestamp(new Date())
+                .payload(appUserDTO)
+                .build();
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) throws Exception {
-        authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        final UserDetails userDetails = userService.loadUserByUsername(loginRequest.getEmail());
-        final String token = jwtService.generateToken(userDetails);
-        AuthResponse authResponse = new AuthResponse(token);
-        return ResponseEntity.ok(authResponse);
-    }
-
-    private void authenticate(String email, String password) throws Exception {
+    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) throws BadRequestException {
         try {
-            UserDetails userDetails = userService.loadUserByUsername(email);
-            System.out.println("UserDetail : " + userDetails);
-            if (userDetails == null) {
-                throw new BadRequestException("User not found");
+            // Check if email format is valid
+            if (!isValidEmail(loginRequest.getEmail())) {
+                throw new BadRequestException("Invalid email format");
             }
-            System.out.println("UserDetail is not null");
-            System.out.println("Password : " + password);
-            System.out.println("UserDetail password : " + userDetails.getPassword());
-            boolean passwordMatches = passwordEncoder.matches(password, userDetails.getPassword());
-            System.out.println("Password Matches: " + passwordMatches); // Log the comparison result
-            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-                throw new BadCredentialsException("Invalid password");
+
+            // Check if email or password is blank
+            if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty() ||
+                    loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+                throw new BlankFieldException("One or more fields are blank");
             }
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-            System.out.println("Heng");
-        } catch (DisabledException e) {
-            throw new Exception("User disabled", e);
-        } catch (BadCredentialsException e) {
-            throw new Exception("Invalid credentials", e);
+
+            // Check if the user exists
+            User user = userRepository.findUserByEmail(loginRequest.getEmail());
+            if (user == null) {
+                throw new UserNotFoundException("User not found");
+            }
+
+            // Authenticate user
+            UserDetails userDetails = userService.loadUserByUsername(loginRequest.getEmail());
+            if (!passwordEncoder.matches(loginRequest.getPassword(), userDetails.getPassword())) {
+                throw new BadRequestException("Invalid password");
+            }
+
+            // Generate JWT token
+            final String token = jwtService.generateToken(userDetails);
+
+            // Create and return authentication response
+            AuthResponse authResponse = new AuthResponse(token);
+            return ResponseEntity.ok(authResponse);
+        } catch (UserNotFoundException | BadRequestException | BlankFieldException e) {
+            throw e; // Let the GlobalExceptionHandler handle the exception
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred"); // Let Spring handle other unexpected exceptions
         }
     }
 }

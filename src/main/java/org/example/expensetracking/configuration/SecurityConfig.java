@@ -52,7 +52,9 @@ public class SecurityConfig  {
         http
                 .cors(withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auth/**","/v3/api-docs/**",
+                        .requestMatchers(
+                                "/auth/**",
+                                "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/v1/files/**",

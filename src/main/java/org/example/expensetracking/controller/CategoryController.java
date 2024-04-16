@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -23,18 +24,20 @@ public class CategoryController {
         this.categoryService = categoryService;
 
     }
+
     @GetMapping
-    public ResponseEntity<?> getAllCategories(@Positive @RequestParam(defaultValue = "1") Integer page,@Positive @RequestParam(defaultValue = "2")Integer size){
-        List<Category> categoryList = categoryService.getAllCategories(page,size);
+    public ResponseEntity<?> getAllCategories(@Positive @RequestParam(defaultValue = "1") Integer page, @Positive @RequestParam(defaultValue = "2") Integer size) {
+        List<Category> categoryList = categoryService.getAllCategories(page, size);
         return ResponseEntity.ok(new ApiResponse<>(
                 "about:blank",
                 "You get all categories successfully",
+                HttpStatus.OK,
                 HttpStatus.OK.value(),
-                "/api/v1/category/",
+                "/api/v1/categories?page=" + page + "&size=" + size,
                 new Date(),
                 null,
                 categoryList
-
         ));
+
     }
 }

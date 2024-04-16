@@ -1,9 +1,6 @@
 package org.example.expensetracking.repository;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.model.Category;
 
 
@@ -20,7 +17,8 @@ public interface CategoryRepository {
             @Result(property = "categoryID",column = "category_id"),
             @Result(property = "name", column = "name"),
             @Result(property = "description", column = "description"),
-            @Result(property = "userId",column = "user_id")
+            @Result(property = "userId",column = "user_id",
+            one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserByEmail"))
     })
     List<Category> getAllCategories(Integer page, Integer size);
 }

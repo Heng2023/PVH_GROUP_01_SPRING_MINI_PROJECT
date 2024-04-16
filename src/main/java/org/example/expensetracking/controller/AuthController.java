@@ -55,78 +55,44 @@ public class AuthController {
     }
 
     @PostMapping("/forget")
-    public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) {
-        try {
-            // Check if email is provided and exists
-            if (email == null || email.isEmpty()) {
-                throw new BlankFieldException("Email field is blank");
-            }
-            User user = userRepository.findUserByEmail(email);
-            if (user == null) {
-                throw new UserNotFoundException("User not found");
-            }
-
-            // Check if password and confirm password are provided and match
-            String password = forgetRequest.getPassword();
-            String confirmPassword = forgetRequest.getConfirmPassword();
-            if (password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
-                throw new BlankFieldException("Password or Confirm Password field is blank");
-            }
-            if (!password.equals(confirmPassword)) {
-                throw new BadRequestException("Password and Confirm Password do not match");
-            }
-
-            // Encrypt the new password
-            String encodedPassword = passwordEncoder.encode(password);
-
-            // Update user's password
-            userRepository.updatePasswordByEmail(email, encodedPassword);
-
-            // Return success response
-            ApiResponse<String> response = ApiResponse.<String>builder()
-                    .type("about:blank")
-                    .message("Password reset successful")
-                    .status(HttpStatus.OK)
-                    .code(HttpStatus.OK.value())
-                    .instance("/api/v1/auths/forget")
-                    .timestamp(new Date())
-                    .payload(null)
-                    .build();
-
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (UserNotFoundException | BlankFieldException | BadRequestException e) {
-            // Handle specific exceptions with ApiErrorResponse
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred");
-
-            ApiErrorResponse errorResponse = new ApiErrorResponse(
-                    "about:blank",
-                    "Bad Request",
-                    HttpStatus.BAD_REQUEST,
-                    400,
-                    "/api/v1/auths/forget",
-                    new Date(),
-                    errorMap
-            );
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        } catch (Exception e) {
-            // Handle other exceptions with ApiErrorResponse
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred");
-
-            ApiErrorResponse errorResponse = new ApiErrorResponse(
-                    "about:blank",
-                    "Internal Server Error",
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    500,
-                    "/api/v1/auths/forget",
-                    new Date(),
-                    errorMap
-            );
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) throws BadRequestException {
+        // Check if email is provided and exists
+        if (email == null || email.isEmpty()) {
+            throw new BlankFieldException("Email field is blank");
         }
+        User user = userRepository.findUserByEmail(email);
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        // Check if password and confirm password are provided and match
+        String password = forgetRequest.getPassword();
+        String confirmPassword = forgetRequest.getConfirmPassword();
+        if (password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
+            throw new BlankFieldException("Password or Confirm Password field is blank");
+        }
+        if (!password.equals(confirmPassword)) {
+            throw new BadRequestException("Password and Confirm Password do not match");
+        }
+
+        // Encrypt the new password
+        String encodedPassword = passwordEncoder.encode(password);
+
+        // Update user's password and fetch updated user details
+        AppUserDTO updatedUserDTO = userRepository.updatePasswordByEmail(email, encodedPassword);
+
+        // Build user response DTO
+        ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder()
+                .type("about:blank")
+                .message("Password reset successful")
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .instance("/api/v1/auths/forget")
+                .timestamp(new Date())
+                .payload(updatedUserDTO) // Include updated user details in payload
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("resend")

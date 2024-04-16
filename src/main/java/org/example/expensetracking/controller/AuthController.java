@@ -2,13 +2,14 @@ package org.example.expensetracking.controller;
 
 import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.example.expensetracking.exceptionhandler.AuthenticationException;
 import org.example.expensetracking.exceptionhandler.BlankFieldException;
 import org.example.expensetracking.exceptionhandler.RegistrationException;
 import org.example.expensetracking.exceptionhandler.UserNotFoundException;
 import org.example.expensetracking.model.User;
+import org.example.expensetracking.model.dto.request.ForgetRequest;
 import org.example.expensetracking.model.dto.request.LoginRequest;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
+import org.example.expensetracking.model.dto.response.ApiErrorResponse;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.model.dto.response.AuthResponse;
@@ -20,17 +21,15 @@ import org.example.expensetracking.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.PrivateKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequestMapping("/api/v1/auths")
 @RestController
@@ -55,9 +54,79 @@ public class AuthController {
         return "verify";
     }
 
-    @PutMapping("/forget")
-    public String forget() {
-        return "forget";
+    @PostMapping("/forget")
+    public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) {
+        try {
+            // Check if email is provided and exists
+            if (email == null || email.isEmpty()) {
+                throw new BlankFieldException("Email field is blank");
+            }
+            User user = userRepository.findUserByEmail(email);
+            if (user == null) {
+                throw new UserNotFoundException("User not found");
+            }
+
+            // Check if password and confirm password are provided and match
+            String password = forgetRequest.getPassword();
+            String confirmPassword = forgetRequest.getConfirmPassword();
+            if (password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
+                throw new BlankFieldException("Password or Confirm Password field is blank");
+            }
+            if (!password.equals(confirmPassword)) {
+                throw new BadRequestException("Password and Confirm Password do not match");
+            }
+
+            // Encrypt the new password
+            String encodedPassword = passwordEncoder.encode(password);
+
+            // Update user's password
+            userRepository.updatePasswordByEmail(email, encodedPassword);
+
+            // Return success response
+            ApiResponse<String> response = ApiResponse.<String>builder()
+                    .type("about:blank")
+                    .message("Password reset successful")
+                    .status(HttpStatus.OK)
+                    .code(HttpStatus.OK.value())
+                    .instance("/api/v1/auths/forget")
+                    .timestamp(new Date())
+                    .payload(null)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (UserNotFoundException | BlankFieldException | BadRequestException e) {
+            // Handle specific exceptions with ApiErrorResponse
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred");
+
+            ApiErrorResponse errorResponse = new ApiErrorResponse(
+                    "about:blank",
+                    "Bad Request",
+                    HttpStatus.BAD_REQUEST,
+                    400,
+                    "/api/v1/auths/forget",
+                    new Date(),
+                    errorMap
+            );
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (Exception e) {
+            // Handle other exceptions with ApiErrorResponse
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred");
+
+            ApiErrorResponse errorResponse = new ApiErrorResponse(
+                    "about:blank",
+                    "Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    500,
+                    "/api/v1/auths/forget",
+                    new Date(),
+                    errorMap
+            );
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     @PostMapping("resend")
@@ -72,8 +141,11 @@ public class AuthController {
             throw new RegistrationException("Password and Confirm Password do not match");
         }
 
-        if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty() ||
-                registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
+        if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
+            throw new RegistrationException("One or more fields are blank");
+        }
+
+        if (registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
             throw new RegistrationException("One or more fields are blank");
         }
 

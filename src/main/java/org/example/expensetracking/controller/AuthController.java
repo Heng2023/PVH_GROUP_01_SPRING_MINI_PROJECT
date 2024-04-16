@@ -56,11 +56,15 @@ public class AuthController {
 
     @PostMapping("/forget")
     public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) throws BadRequestException {
+        // Convert email to lowercase
+        String lowerCaseEmail = email.toLowerCase();
+
         // Check if email is provided and exists
-        if (email == null || email.isEmpty()) {
+        if (lowerCaseEmail == null || lowerCaseEmail.isEmpty()) {
             throw new BlankFieldException("Email field is blank");
         }
-        User user = userRepository.findUserByEmail(email);
+        // Fetch user by email, converting email to lowercase for comparison
+        User user = userRepository.findUserByEmail(lowerCaseEmail);
         if (user == null) {
             throw new UserNotFoundException("User not found");
         }
@@ -79,7 +83,8 @@ public class AuthController {
         String encodedPassword = passwordEncoder.encode(password);
 
         // Update user's password and fetch updated user details
-        AppUserDTO updatedUserDTO = userRepository.updatePasswordByEmail(email, encodedPassword);
+        // Note: Ensure that the updatePasswordByEmail method in your UserRepository also uses the lowerCaseEmail for comparison
+        AppUserDTO updatedUserDTO = userRepository.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
 
         // Build user response DTO
         ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder()
@@ -102,6 +107,10 @@ public class AuthController {
 
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws BadRequestException {
+        // Convert email to lowercase
+        String lowerCaseEmail = registerRequest.getEmail().toLowerCase();
+        registerRequest.setEmail(lowerCaseEmail);
+
         // Validate registerRequest...
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
             throw new RegistrationException("Password and Confirm Password do not match");
@@ -161,6 +170,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) throws BadRequestException {
         try {
+            // Convert email to lowercase
+            String lowerCaseEmail = loginRequest.getEmail().toLowerCase();
+            loginRequest.setEmail(lowerCaseEmail);
+
             // Check if email format is valid
             if (!isValidEmail(loginRequest.getEmail())) {
                 throw new BadRequestException("Invalid email format");

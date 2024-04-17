@@ -47,9 +47,12 @@ public class AuthController {
 
     private final MailSenderService mailSenderService;
 
-    private UUID getUserIdByOtpCode(String otpCode) {
-        Date currentTime = new Date();
-        return otpRepository.findUserIdByOtpCode(otpCode, currentTime);
+    // Define a password pattern
+    private static final String PASSWORD_PATTERN = ".{6,}";
+
+    // Check if the password matches the defined pattern
+    private boolean isValidPassword(String password) {
+        return password != null && password.matches(PASSWORD_PATTERN);
     }
 
     private boolean isValidEmail(String email) {
@@ -144,6 +147,12 @@ public class AuthController {
             if (password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
                 throw new BlankFieldException("Password or Confirm Password field is blank");
             }
+
+            // Validate the password format
+            if (!isValidPassword(password)) {
+                throw new BadRequestException("Password must contain at least six digits or characters");
+            }
+
             if (!password.equals(confirmPassword)) {
                 throw new BadRequestException("Password and Confirm Password do not match");
             }
@@ -342,6 +351,11 @@ public class AuthController {
             registerRequest.setEmail(lowerCaseEmail);
 
             // Validate registerRequest...
+            // Validate the password format
+            if (!isValidPassword(registerRequest.getPassword())) {
+                throw new BadRequestException("Password must contain at least six digits or characters");
+            }
+
             if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
                 throw new RegistrationException("Password and Confirm Password do not match");
             }

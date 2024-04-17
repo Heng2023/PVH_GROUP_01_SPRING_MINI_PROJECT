@@ -63,4 +63,14 @@ public class UserServiceImpl implements UserService {
         // Return saved user details
         return savedUser;
     }
+
+    @Override
+    public AppUserDTO findUserById(UUID userId) {
+        return userRepository.findUserById(userId);
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return userRepository.findUserByEmail(email);
+    }
 }

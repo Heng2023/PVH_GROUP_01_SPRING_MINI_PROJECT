@@ -1,18 +1,17 @@
-package org.example.expensetracking.model;
+package org.example.expensetracking.model.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.expensetracking.model.dto.response.AppUserDTO;
+import org.example.expensetracking.model.User;
 
 import java.util.UUID;
-
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class Category {
+@AllArgsConstructor
+public class CategoryResponse {
     private UUID categoryID;
     private String name;
     private String description;
-    private AppUserDTO user;
+    private UserResponse user;
 }

@@ -12,7 +12,6 @@ import org.example.expensetracking.model.dto.request.LoginRequest;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
 import org.example.expensetracking.model.dto.response.ApiErrorResponse;
 import org.example.expensetracking.model.dto.response.ApiResponse;
-import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.model.dto.response.AuthResponse;
 import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
@@ -154,10 +153,10 @@ public class AuthController {
 
             // Update user's password and fetch updated user details
             // Note: Ensure that the updatePasswordByEmail method in your UserRepository also uses the lowerCaseEmail for comparison
-            AppUserDTO updatedUserDTO = userRepository.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
+            User updatedUserDTO = userRepository.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
 
             // Build user response DTO
-            ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder()
+            ApiResponse<User> response = ApiResponse.<User>builder()
                     .type("about:blank")
                     .message("Password reset successful")
                     .status(HttpStatus.OK)
@@ -171,7 +170,7 @@ public class AuthController {
         } catch (BlankFieldException e) {
             // Handle blank field exception
             Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "One or more fields are blank");
+            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "One or more fields is/are blank");
             ApiErrorResponse errorResponse = new ApiErrorResponse(
                     "about:blank",
                     "Blank Field Error",
@@ -235,7 +234,7 @@ public class AuthController {
             String lowerCaseEmail = email.toLowerCase();
 
             // Fetch user DTO by email
-            AppUserDTO userDTO = userRepository.findUserDtoByEmail(lowerCaseEmail);
+            User userDTO = userRepository.findUserByEmail(lowerCaseEmail);
             System.out.println("Fetched user: " + userDTO); // Debug log
 
             if (userDTO == null) {
@@ -348,11 +347,11 @@ public class AuthController {
             }
 
             if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
-                throw new RegistrationException("One or more fields are blank");
+                throw new RegistrationException("One or more fields is/are blank");
             }
 
             if (registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
-                throw new RegistrationException("One or more fields are blank");
+                throw new RegistrationException("One or more fields is/are blank");
             }
 
             // Check if email format is valid
@@ -382,10 +381,10 @@ public class AuthController {
             // If all validations pass, proceed with registration
             String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
             registerRequest.setPassword(encodedPassword);
-            AppUserDTO appUserDTO = userService.createUser(registerRequest);
+            User appUserDTO = userService.createUser(registerRequest);
 
             // Return ApiResponse for successful registration
-            ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder()
+            ApiResponse<User> response = ApiResponse.<User>builder()
                     .type("about:blank")
                     .message("Successfully Registered")
                     .code(HttpStatus.CREATED.value())
@@ -452,7 +451,7 @@ public class AuthController {
             // Check if email or password is blank
             if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty() ||
                     loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
-                throw new BlankFieldException("One or more fields are blank");
+                throw new BlankFieldException("One or more fields is/are blank");
             }
 
             // Check if email format is valid
@@ -461,7 +460,7 @@ public class AuthController {
             }
 
             // Check if the user exists
-            AppUserDTO user = userRepository.findUserDtoByEmail(loginRequest.getEmail());
+            User user = userRepository.findUserByEmail(loginRequest.getEmail());
             if (user == null) {
                 throw new UserNotFoundException("User not found");
             }
@@ -525,7 +524,7 @@ public class AuthController {
         } catch (BlankFieldException e) {
             // Handle blank field exception
             Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "One or more fields are blank");
+            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "One or more fields is/are blank");
             ApiErrorResponse errorResponse = new ApiErrorResponse(
                     "about:blank",
                     "Blank Field Error",

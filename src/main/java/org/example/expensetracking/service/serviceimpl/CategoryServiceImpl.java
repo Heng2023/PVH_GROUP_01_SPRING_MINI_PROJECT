@@ -44,5 +44,14 @@ public class CategoryServiceImpl implements CategoryService {
             return null;
         }}
 
+    @Override
+    public void deleteCategoryById(UUID userId, UUID categoryId) {
+        Category category = categoryRepository.getCategoryById(categoryId, userId);
+        if (category != null) {
+            categoryRepository.deleteCategoryById(categoryId, userId);
+        }
+
+    }
+
 
 }

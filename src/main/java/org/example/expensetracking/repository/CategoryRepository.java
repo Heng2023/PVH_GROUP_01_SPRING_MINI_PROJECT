@@ -28,6 +28,12 @@ public interface CategoryRepository {
     """)
     @ResultMap("categoryMapping")
    Category getCategoryById(UUID categoryId,UUID userId);
+    //Delete Category
+    @Select("""
+    DELETE  FROM categories WHERE category_id = #{categoryId}
+    AND user_id = #{userId}
+    """)
+    void deleteCategoryById (UUID categoryId,UUID userId);
 
 
 }

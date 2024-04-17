@@ -19,13 +19,10 @@ import java.io.IOException;
 @RequestMapping("/api/v1/files")
 @SecurityRequirement(name = "bearerAuth")
 public class AppFileController {
-
     private final FileService fileService;
-
     public AppFileController(FileService fileService) {
         this.fileService = fileService;
     }
-
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFile(@RequestParam MultipartFile file) throws IOException {
         String fileName = fileService.saveFile(file);

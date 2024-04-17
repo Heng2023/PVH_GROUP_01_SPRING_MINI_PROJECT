@@ -126,52 +126,52 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping("resend")
-    public ResponseEntity<?> resendOtp(@RequestParam("email") String email) {
-        // Convert email to lowercase
-        String lowerCaseEmail = email.toLowerCase();
-
-        // Fetch user DTO by email
-        AppUserDTO userDTO = userRepository.findUserDtoByEmail(lowerCaseEmail);
-        System.out.println("Fetched user: " + userDTO); // Debug log
-
-        if (userDTO == null) {
-            // If the user is not found, return an error response
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        }
-
-        // Ensure that userId is not null
-        if (userDTO.getUserId() == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User ID is null.");
-        }
-
-        // Check if the user has already verified (OTP is not required)
-        boolean userVerified = otpRepository.isUserVerified(userDTO.getUserId());
-
-        // If the user is already verified, return a message indicating that
-        if (userVerified) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has already been verified.");
-        }
-
-        // Generate a new OTP code using OtpService
-        String newOtpCode = otpService.generateOTP(6); // Assuming you want a 6-digit OTP
-
-        // Create a new OTP object
-        Otp newOtp = new Otp();
-        newOtp.setOtpCode(newOtpCode);
-        newOtp.setIssuedAt(new Date());
-        newOtp.setExpiration(calculateExpirationDate()); // Implement this method to calculate the expiration date
-        newOtp.setUserId(userDTO.getUserId()); // Set the userId from the User object
-
-        // Save the new OTP to the database
-        otpRepository.saveOtp(newOtp);
-
-        // Send the new OTP to the user's email
-        mailSenderService.sendEmail(lowerCaseEmail, newOtpCode);
-
-        // Return a success response
-        return ResponseEntity.ok("New OTP sent successfully.");
-    }
+//    @PostMapping("resend")
+//    public ResponseEntity<?> resendOtp(@RequestParam("email") String email) {
+//        // Convert email to lowercase
+//        String lowerCaseEmail = email.toLowerCase();
+//
+//        // Fetch user DTO by email
+//        AppUserDTO userDTO = userRepository.findUserDtoByEmail(lowerCaseEmail);
+//        System.out.println("Fetched user: " + userDTO); // Debug log
+//
+//        if (userDTO == null) {
+//            // If the user is not found, return an error response
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+//        }
+//
+//        // Ensure that userId is not null
+//        if (userDTO.getUserId() == null) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User ID is null.");
+//        }
+//
+//        // Check if the user has already verified (OTP is not required)
+//        boolean userVerified = otpRepository.isUserVerified(userDTO.getUserId());
+//
+//        // If the user is already verified, return a message indicating that
+//        if (userVerified) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has already been verified.");
+//        }
+//
+//        // Generate a new OTP code using OtpService
+//        String newOtpCode = otpService.generateOTP(6); // Assuming you want a 6-digit OTP
+//
+//        // Create a new OTP object
+//        Otp newOtp = new Otp();
+//        newOtp.setOtpCode(newOtpCode);
+//        newOtp.setIssuedAt(new Date());
+//        newOtp.setExpiration(calculateExpirationDate()); // Implement this method to calculate the expiration date
+//        newOtp.setUserId(userDTO.getUserId()); // Set the userId from the User object
+//
+//        // Save the new OTP to the database
+//        otpRepository.saveOtp(newOtp);
+//
+//        // Send the new OTP to the user's email
+//        mailSenderService.sendEmail(lowerCaseEmail, newOtpCode);
+//
+//        // Return a success response
+//        return ResponseEntity.ok("New OTP sent successfully.");
+//    }
 
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws BadRequestException {

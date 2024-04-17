@@ -23,7 +23,7 @@ public interface UserRepository {
     User findUserByEmail(@Param("email") String email);
 
     @Update("UPDATE users SET password = #{encodedPassword} WHERE email = #{email}")
-    void updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
+    AppUserDTO updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
 
     @Select("""
             SELECT * FROM user WHERE user_id = #{userId}

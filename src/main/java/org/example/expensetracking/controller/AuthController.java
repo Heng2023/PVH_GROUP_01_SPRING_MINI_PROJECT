@@ -5,14 +5,15 @@ import org.apache.coyote.BadRequestException;
 import org.example.expensetracking.exceptionhandler.BlankFieldException;
 import org.example.expensetracking.exceptionhandler.RegistrationException;
 import org.example.expensetracking.exceptionhandler.UserNotFoundException;
+import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.ForgetRequest;
 import org.example.expensetracking.model.dto.request.LoginRequest;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
-import org.example.expensetracking.model.dto.response.ApiErrorResponse;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.model.dto.response.AuthResponse;
+import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.security.JwtService;
 import org.example.expensetracking.service.FileService;
@@ -28,8 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @RequestMapping("/api/v1/auths")
 @RestController
@@ -41,6 +40,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final OtpRepository otpRepository;
 
     private final MailSenderService mailSenderService;
 
@@ -49,84 +49,70 @@ public class AuthController {
         return email != null && email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
     }
 
-    @PutMapping("/verify")
-    public String verify() {
-        return "verify";
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyOtp(@RequestParam("otpCode") String otpCode) {
+        // Get the current time to check if the OTP has expired
+        Date currentTime = new Date();
+
+        // Find the OTP by its code and check if it has not expired
+        Otp otp = otpRepository.findOtpByCodeAndNotExpired(otpCode, currentTime);
+
+        if (otp == null) {
+            // If the OTP is not found or has expired, return an error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP code.");
+        }
+
+        // Update the OTP's verify field to true in the database
+        otpRepository.updateOtpVerification(otpCode);
+
+        // Return a success response
+        return ResponseEntity.ok("OTP verified successfully.");
     }
 
     @PostMapping("/forget")
-    public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) {
-        try {
-            // Check if email is provided and exists
-            if (email == null || email.isEmpty()) {
-                throw new BlankFieldException("Email field is blank");
-            }
-            User user = userRepository.findUserByEmail(email);
-            if (user == null) {
-                throw new UserNotFoundException("User not found");
-            }
+    public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) throws BadRequestException {
+        // Convert email to lowercase
+        String lowerCaseEmail = email.toLowerCase();
 
-            // Check if password and confirm password are provided and match
-            String password = forgetRequest.getPassword();
-            String confirmPassword = forgetRequest.getConfirmPassword();
-            if (password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
-                throw new BlankFieldException("Password or Confirm Password field is blank");
-            }
-            if (!password.equals(confirmPassword)) {
-                throw new BadRequestException("Password and Confirm Password do not match");
-            }
-
-            // Encrypt the new password
-            String encodedPassword = passwordEncoder.encode(password);
-
-            // Update user's password
-            userRepository.updatePasswordByEmail(email, encodedPassword);
-
-            // Return success response
-            ApiResponse<String> response = ApiResponse.<String>builder()
-                    .type("about:blank")
-                    .message("Password reset successful")
-                    .status(HttpStatus.OK)
-                    .code(HttpStatus.OK.value())
-                    .instance("/api/v1/auths/forget")
-                    .timestamp(new Date())
-                    .payload(null)
-                    .build();
-
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (UserNotFoundException | BlankFieldException | BadRequestException e) {
-            // Handle specific exceptions with ApiErrorResponse
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred");
-
-            ApiErrorResponse errorResponse = new ApiErrorResponse(
-                    "about:blank",
-                    "Bad Request",
-                    HttpStatus.BAD_REQUEST,
-                    400,
-                    "/api/v1/auths/forget",
-                    new Date(),
-                    errorMap
-            );
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        } catch (Exception e) {
-            // Handle other exceptions with ApiErrorResponse
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred");
-
-            ApiErrorResponse errorResponse = new ApiErrorResponse(
-                    "about:blank",
-                    "Internal Server Error",
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    500,
-                    "/api/v1/auths/forget",
-                    new Date(),
-                    errorMap
-            );
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        // Check if email is provided and exists
+        if (lowerCaseEmail == null || lowerCaseEmail.isEmpty()) {
+            throw new BlankFieldException("Email field is blank");
         }
+        // Fetch user by email, converting email to lowercase for comparison
+        User user = userRepository.findUserByEmail(lowerCaseEmail);
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        // Check if password and confirm password are provided and match
+        String password = forgetRequest.getPassword();
+        String confirmPassword = forgetRequest.getConfirmPassword();
+        if (password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
+            throw new BlankFieldException("Password or Confirm Password field is blank");
+        }
+        if (!password.equals(confirmPassword)) {
+            throw new BadRequestException("Password and Confirm Password do not match");
+        }
+
+        // Encrypt the new password
+        String encodedPassword = passwordEncoder.encode(password);
+
+        // Update user's password and fetch updated user details
+        // Note: Ensure that the updatePasswordByEmail method in your UserRepository also uses the lowerCaseEmail for comparison
+        AppUserDTO updatedUserDTO = userRepository.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
+
+        // Build user response DTO
+        ApiResponse<AppUserDTO> response = ApiResponse.<AppUserDTO>builder()
+                .type("about:blank")
+                .message("Password reset successful")
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .instance("/api/v1/auths/forget")
+                .timestamp(new Date())
+                .payload(updatedUserDTO) // Include updated user details in payload
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("resend")
@@ -136,6 +122,10 @@ public class AuthController {
 
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws BadRequestException {
+        // Convert email to lowercase
+        String lowerCaseEmail = registerRequest.getEmail().toLowerCase();
+        registerRequest.setEmail(lowerCaseEmail);
+
         // Validate registerRequest...
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
             throw new RegistrationException("Password and Confirm Password do not match");
@@ -195,6 +185,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) throws BadRequestException {
         try {
+            // Convert email to lowercase
+            String lowerCaseEmail = loginRequest.getEmail().toLowerCase();
+            loginRequest.setEmail(lowerCaseEmail);
+
             // Check if email format is valid
             if (!isValidEmail(loginRequest.getEmail())) {
                 throw new BadRequestException("Invalid email format");

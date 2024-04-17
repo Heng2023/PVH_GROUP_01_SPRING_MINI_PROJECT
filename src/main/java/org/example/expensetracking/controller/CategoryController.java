@@ -49,25 +49,41 @@ public class CategoryController {
         ));
 
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        User user = userService.findUserByEmail(email);
-        AppUserDTO user1 = userService.findUserById(user.getUserId());
-        CategoryResponse categoryResponse = categoryService.getCategoryById(user.getUserId(),categoryId);
+//        return ResponseEntity.ok(new ApiResponse<>(
+//                "about:blank",
+//                "You get all categories successfully",
+//                HttpStatus.OK,
+//                HttpStatus.OK.value(),
+//                "/api/v1/categories"+categoryId,
+//                new Date(),
+//                null,
+//                categoryResponse
+//        ));
+//
+//    }
+@GetMapping("/{categoryId}")
+public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String email = auth.getName();
+    User user = userService.findUserByEmail(email);
+    AppUserDTO user1 = userService.findUserById(user.getUserId());
+    CategoryResponse categoryResponse = categoryService.getCategoryById(user.getUserId(), categoryId);
+    if (categoryResponse != null) {
         return ResponseEntity.ok(new ApiResponse<>(
                 "about:blank",
-                "You get all categories successfully",
+                "Category get successfully",
                 HttpStatus.OK,
                 HttpStatus.OK.value(),
-                "/api/v1/categories",
+                "/api/v1/categories/" + categoryId,
                 new Date(),
                 null,
                 categoryResponse
         ));
-
+    } else {
+        return ResponseEntity.notFound().build();
     }
+}
+
 
 
 }

@@ -26,6 +26,7 @@ public interface CategoryRepository {
     SELECT * FROM categories WHERE category_id = #{categoryId}
     AND user_id = #{userId}
     """)
+    @ResultMap("categoryMapping")
    Category getCategoryById(UUID categoryId,UUID userId);
 
 

@@ -36,3 +36,5 @@ CREATE TABLE expenses(
 );
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+SELECT * FROM categories WHERE user_id = '07006cc5-ed13-494f-be94-103785f5af86'

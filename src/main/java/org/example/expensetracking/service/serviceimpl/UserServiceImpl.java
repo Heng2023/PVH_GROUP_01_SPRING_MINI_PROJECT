@@ -26,4 +26,9 @@ public class UserServiceImpl implements UserService {
     public AppUserDTO createUser(RegisterRequest registerRequest) {
         return userRepository.saveUser(registerRequest);
     }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findUserByEmail(email);
+    }
 }

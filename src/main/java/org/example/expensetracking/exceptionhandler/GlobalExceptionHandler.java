@@ -159,4 +159,21 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<?> handleCategoryNotFoundException(CategoryNotFoundException e) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Category not found");
+
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                "about:blank",
+                "Category Not Found",
+                HttpStatus.NOT_FOUND,
+                404,
+                "/api/v1/categories",
+                new Date(),
+                errorMap
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
 }

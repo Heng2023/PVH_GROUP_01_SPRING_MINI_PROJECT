@@ -4,6 +4,8 @@ import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
 
+import java.util.UUID;
+
 @Mapper
 public interface UserRepository {
     @Results(id = "UserMapping", value = {
@@ -33,4 +35,10 @@ public interface UserRepository {
         RETURNING user_id, email,password, profile_image
     """)
     User updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
+
+    @Select("""
+    SELECT * FROM users WHERE user_id = #{userId}
+    """)
+    @ResultMap("UserMapping")
+    User findUserById(UUID userId);
 }

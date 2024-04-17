@@ -20,6 +20,7 @@ import org.example.expensetracking.service.FileService;
 import org.example.expensetracking.service.MailSenderService;
 import org.example.expensetracking.service.OtpService;
 import org.example.expensetracking.service.UserService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,6 +48,11 @@ public class AuthController {
     private final OtpService otpService;
 
     private final MailSenderService mailSenderService;
+
+    private UUID getUserIdByOtpCode(String otpCode) {
+        Date currentTime = new Date();
+        return otpRepository.findUserIdByOtpCode(otpCode, currentTime);
+    }
 
     private boolean isValidEmail(String email) {
         // Simple email format validation
@@ -146,7 +152,7 @@ public class AuthController {
         }
 
         // Check if the user has already verified (OTP is not required)
-        boolean userVerified = otpRepository.isUserVerified(userDTO.getUserId());
+        boolean userVerified = otpRepository.userVerified(userDTO.getUserId());
 
         // If the user is already verified, return a message indicating that
         if (userVerified) {
@@ -236,7 +242,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) throws BadRequestException {
+    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) {
         try {
             // Convert email to lowercase
             String lowerCaseEmail = loginRequest.getEmail().toLowerCase();
@@ -254,9 +260,17 @@ public class AuthController {
             }
 
             // Check if the user exists
-            User user = userRepository.findUserByEmail(loginRequest.getEmail());
+            AppUserDTO user = userRepository.findUserDtoByEmail(loginRequest.getEmail());
+            System.out.println(user);
+            System.out.println(user);
             if (user == null) {
                 throw new UserNotFoundException("User not found");
+            }
+
+            //Check if the user has already verified via OTP
+            boolean userVerified = otpRepository.isUserVerified(user.getUserId());
+            if (!userVerified) {
+                throw new BadRequestException("User has not been verified");
             }
 
             // Authenticate user
@@ -268,13 +282,25 @@ public class AuthController {
             // Generate JWT token
             final String token = jwtService.generateToken(userDetails);
 
-            // Create and return authentication response
+            // Create and return authentication response with token
             AuthResponse authResponse = new AuthResponse(token);
             return ResponseEntity.ok(authResponse);
-        } catch (UserNotFoundException | BadRequestException | BlankFieldException e) {
-            throw e; // Let the GlobalExceptionHandler handle the exception
+        }  catch (UserNotFoundException e) {
+            // Handle user not found exception
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (BadRequestException e) {
+            // Handle bad request exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (BlankFieldException e) {
+            // Handle blank field exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (DataAccessException e) {
+            // Handle database access exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("An unexpected error occurred"); // Let Spring handle other unexpected exceptions
+            // Log the unexpected exception
+            e.printStackTrace(); // Or use a logging framework
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 }

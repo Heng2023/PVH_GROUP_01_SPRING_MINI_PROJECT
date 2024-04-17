@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -14,8 +13,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class ApiErrorResponse {
     private String type;
-    private String title;
-    private int status;
+    private String message;
+    private HttpStatus status;
+    private Integer code;
     private String instance;
     private Date timestamp;
     private Map<String, String> errors;
@@ -28,7 +28,7 @@ public class ApiErrorResponse {
 //          ErrorResponse errorResponse = new ErrorResponse(
 //                "about:blank",
 //                "Internal Server Error",
-//                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+//                HttpStatus.INTERNAL_SERVER_ERROR.value(),"500",
 //                "/api/v1/attendees/" + id,
 //                new Date(),
 //                errorMap

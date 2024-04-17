@@ -1,16 +1,21 @@
 package org.example.expensetracking.model.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
+    @Email
     private String email;
-    private BCryptPasswordEncoder password;
-    private BCryptPasswordEncoder confirmPassword;
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$")
+    private String password;
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$")
+    private String confirmPassword;
     private String profileImage;
 }
+

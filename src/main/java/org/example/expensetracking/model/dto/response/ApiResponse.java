@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.expensetracking.model.Category;
 import org.springframework.http.HttpStatus;
 
 import java.util.Date;
@@ -26,6 +27,7 @@ public class ApiResponse <T> {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T payload;
+
 }
 
 //   Example:

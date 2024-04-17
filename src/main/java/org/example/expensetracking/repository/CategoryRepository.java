@@ -2,6 +2,7 @@ package org.example.expensetracking.repository;
 
 import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.model.Category;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
 
 
 import java.util.List;
@@ -23,4 +24,12 @@ public interface CategoryRepository {
             one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserByEmail"))
     })
     List<Category> getAllCategories(Integer page, Integer size);
+
+    //Insert Category
+    @Select("""
+    INSERT INTO categories (category_id, name,user_id)
+    VALUES (#{categoryID}, #{name},#{userId})
+    RETURNING *
+""")
+    List<Category> insertCategory(CategoryRequest categoryRequest);
 }

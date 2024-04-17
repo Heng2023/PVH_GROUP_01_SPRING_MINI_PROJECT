@@ -1,15 +1,14 @@
 package org.example.expensetracking.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.example.expensetracking.model.Category;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -24,7 +23,7 @@ public class CategoryController {
         this.categoryService = categoryService;
 
     }
-
+    //Get All Category
     @GetMapping
     public ResponseEntity<?> getAllCategories(@Positive @RequestParam(defaultValue = "1") Integer page, @Positive @RequestParam(defaultValue = "2") Integer size) {
         List<Category> categoryList = categoryService.getAllCategories(page, size);
@@ -39,5 +38,22 @@ public class CategoryController {
                 categoryList
         ));
 
+    }
+
+    //Insert Category
+    @PostMapping
+    public ResponseEntity<ApiResponse<Category>> insertCategory(@Valid @RequestBody CategoryRequest categoryRequest ) {
+        Category category = (Category) (Category) categoryService.insertCategory(categoryRequest);
+        ApiResponse<Category> apiResponse = new ApiResponse<>(
+                "about:blank",
+                "You insert categories successfully",
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "/api/v1/categories?page",
+                new Date(),
+                null,
+                category
+        );
+        return ResponseEntity.ok(apiResponse);
     }
 }

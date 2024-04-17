@@ -35,5 +35,11 @@ public interface CategoryRepository {
     @ResultMap("categoryMapping")
     Category insertCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
+    @Select("""
+    UPDATE categories SET name = #{category.name}, description = #{category.description}
+    WHERE category_id = #{userId}
+    """)
+    @ResultMap("categoryMapping")
+    Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
 }

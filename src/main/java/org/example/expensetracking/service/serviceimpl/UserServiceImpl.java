@@ -4,6 +4,7 @@ import org.example.expensetracking.model.CustomUserDetails;
 import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
+import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.service.MailSenderService;
@@ -35,12 +36,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(RegisterRequest registerRequest) {
+    public AppUserDTO createUser(RegisterRequest registerRequest) {
         // Generate OTP
         String otp = otpService.generateOTP(6); // Assuming 6-digit OTP
 
         // Proceed with user registration and retrieve the user ID
-        User savedUser = userRepository.saveUser(registerRequest);
+        AppUserDTO savedUser = userRepository.saveUser(registerRequest);
         UUID userId = savedUser.getUserId();
         System.out.println(userId);
 
@@ -64,7 +65,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByEmail(String email) {
+    public AppUserDTO findUserById(UUID userId) {
+        return userRepository.findUserById(userId);
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
     }
 }

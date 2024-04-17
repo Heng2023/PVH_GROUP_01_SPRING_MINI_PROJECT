@@ -1,15 +1,10 @@
 package org.example.expensetracking.service.serviceimpl;
 
 import org.example.expensetracking.model.Category;
-import org.example.expensetracking.model.User;
-import org.example.expensetracking.model.dto.request.CategoryRequest;
 import org.example.expensetracking.model.dto.response.CategoryResponse;
 import org.example.expensetracking.repository.CategoryRepository;
-import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.service.CategoryService;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,49 +14,35 @@ import java.util.UUID;
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
-    private final ModelMapper mapper;
+    private final ModelMapper modelMapper;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, ModelMapper mapper) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ModelMapper modelMapper) {
         this.categoryRepository = categoryRepository;
-        this.mapper = mapper;
-    }
-
-
-    @Override
-    public Category addCategory(CategoryRequest categoryRequest) {
-        Category category = mapper.map(categoryRequest, Category.class);
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        category.setUser(currentUser);
-        System.out.println("Current User: " + currentUser);
-
-        return categoryRepository.insertCategory(categoryRequest);
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public List<CategoryResponse> getAllCategories(UUID userId) {
-        List<Category> categories = categoryRepository.findAll(userId);
-        System.out.println("awdwadasd"+categories);
+    public List<CategoryResponse> getAllCategories(UUID userId, Integer page, Integer size) {
+        System.out.println("adskady98q36er2342");
+        List<Category> categoryList = categoryRepository.getAllCategories(userId,page,size);
+        System.out.println("asdadsadad"+categoryList);
         List<CategoryResponse> categoryResponses = new ArrayList<>();
-        for(Category category : categories) {
-            categoryResponses.add(mapper.map(category, CategoryResponse.class));
+        for(Category category : categoryList){
+            CategoryResponse categoryResponse = modelMapper.map(category, CategoryResponse.class);
+            categoryResponses.add(categoryResponse);
         }
         return categoryResponses;
     }
 
     @Override
-    public Category updateCategory(Integer id, CategoryRequest categoryRequest) {
-        return categoryRepository.updateCategory(id, categoryRequest);
-    }
+    public CategoryResponse getCategoryById(UUID userId, UUID categoryId) {
+        Category category = categoryRepository.getCategoryById(categoryId, userId);
+        if (category != null) {
+            return modelMapper.map(category, CategoryResponse.class);
+        } else {
 
-    @Override
-    public void deleteCategory(Integer id) {
-        
-    }
+            return null;
+        }}
 
-    @Override
-    public Category getCategoryById(Integer id) {
-        return null;
-    }
+
 }

@@ -33,4 +33,16 @@ public class CategoryServiceImpl implements CategoryService {
         }
         return categoryResponses;
     }
+
+    @Override
+    public CategoryResponse getCategoryById(UUID userId, UUID categoryId) {
+        Category category = categoryRepository.getCategoryById(categoryId, userId);
+        if (category != null) {
+            return modelMapper.map(category, CategoryResponse.class);
+        } else {
+
+            return null;
+        }}
+
+
 }

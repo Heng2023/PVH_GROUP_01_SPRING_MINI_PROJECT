@@ -39,4 +39,5 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 SELECT * FROM categories WHERE user_id = 'ed04dd47-53a1-4d76-894d-97357dce0e6b'
 LIMIT 1
-OFFSET 2
+OFFSET 2;
+SELECT*FROM categories WHERE category_id='72eff2e2-ab33-4fa9-8285-8beb70cf442a';

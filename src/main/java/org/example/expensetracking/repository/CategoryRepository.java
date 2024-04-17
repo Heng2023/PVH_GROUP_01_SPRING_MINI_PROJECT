@@ -21,4 +21,12 @@ public interface CategoryRepository {
             one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserById"))
     })
     List<Category> getAllCategories(UUID userId, Integer page, Integer size);
+    //Get Category BY ID
+    @Select("""
+    SELECT * FROM categories WHERE category_id = #{categoryId}
+    AND user_id = #{userId}
+    """)
+   Category getCategoryById(UUID categoryId,UUID userId);
+
+
 }

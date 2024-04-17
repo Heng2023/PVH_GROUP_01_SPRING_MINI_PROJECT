@@ -10,13 +10,14 @@ import java.util.UUID;
 
 @Mapper
 public interface CategoryRepository {
-
+    //Insert Category
     @Select("""
     INSERT INTO categories (name, description , user_id)
     VALUES (#{category.name}, #{category.description}, #{user.id})
     """)
     Category insertCategory(@Param("category") CategoryRequest categoryRequest);
 
+    //Get All Category
     @Select("""
             SELECT * FROM categories WHERE user_id = #{user.id}
             """)
@@ -28,19 +29,23 @@ public interface CategoryRepository {
     })
     List<Category> findAll(UUID userId);
 
-
+    //Get Category By Id
     @Select("""
     SELECT * FROM categories WHERE id = #{id}
     """)
     Category findById(Long id);
 
+    //Update Category By Id
     @Select("""
     UPDATE categories SET name = #{name} WHERE id = #{id}
     """)
     Category updateCategory(Integer id, CategoryRequest categoryRequest);
 
+    //Delete Category By Id
     @Delete("""
     DELETE FROM categories WHERE id = #{id}
     """)
     void deleteCategory(Integer id);
+
+
 }

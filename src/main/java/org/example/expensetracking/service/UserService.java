@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface UserService extends UserDetailsService {
     User findUserByEmail(String email);
     User createUser(RegisterRequest registerRequest);
+    User updatePasswordByEmail(String email, String encodedPassword);
 }

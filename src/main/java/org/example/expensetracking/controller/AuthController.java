@@ -40,9 +40,7 @@ public class AuthController {
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
     private final FileService fileService;
-    private final OtpRepository otpRepository;
     private final OtpService otpService;
 
     private final MailSenderService mailSenderService;
@@ -74,7 +72,7 @@ public class AuthController {
             Date currentTime = new Date();
 
             // Find the OTP by its code and check if it has not expired
-            Otp otp = otpRepository.findOtpByCodeAndNotExpired(otpCode, currentTime);
+            Otp otp = otpService.findOtpByCodeAndNotExpired(otpCode, currentTime);
 
             if (otp == null) {
                 // If the OTP is not found or has expired, return an error response
@@ -93,7 +91,7 @@ public class AuthController {
             }
 
             // Update the OTP's verify field to true in the database
-            otpRepository.updateOtpVerification(otpCode);
+            otpService.updateOtpVerification(otpCode);
 
             // Return a success response
             ApiResponse<String> response = ApiResponse.<String>builder()
@@ -136,7 +134,7 @@ public class AuthController {
                 throw new BlankFieldException("Email field is blank");
             }
             // Fetch user by email, converting email to lowercase for comparison
-            User user = userRepository.findUserByEmail(lowerCaseEmail);
+            User user = userService.findUserByEmail(lowerCaseEmail);
             if (user == null) {
                 throw new UserNotFoundException("User not found");
             }
@@ -162,7 +160,7 @@ public class AuthController {
 
             // Update user's password and fetch updated user details
             // Note: Ensure that the updatePasswordByEmail method in your UserRepository also uses the lowerCaseEmail for comparison
-            User updatedUserDTO = userRepository.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
+            User updatedUserDTO = userService.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
 
             // Build user response DTO
             ApiResponse<User> response = ApiResponse.<User>builder()
@@ -243,7 +241,7 @@ public class AuthController {
             String lowerCaseEmail = email.toLowerCase();
 
             // Fetch user DTO by email
-            User userDTO = userRepository.findUserByEmail(lowerCaseEmail);
+            User userDTO = userService.findUserByEmail(lowerCaseEmail);
             System.out.println("Fetched user: " + userDTO); // Debug log
 
             if (userDTO == null) {
@@ -279,7 +277,7 @@ public class AuthController {
             }
 
             // Check if the user has already verified (OTP is not required)
-            boolean userVerified = otpRepository.userVerified(userDTO.getUserId());
+            boolean userVerified = otpService.userVerified(userDTO.getUserId());
 
             // If the user is already verified, return a message indicating that
             if (userVerified) {
@@ -308,7 +306,7 @@ public class AuthController {
             newOtp.setUserId(userDTO.getUserId()); // Set the userId from the User object
 
             // Save the new OTP to the database
-            otpRepository.saveOtp(newOtp);
+            otpService.saveOtp(newOtp);
 
             // Send the new OTP to the user's email
             mailSenderService.sendEmail(lowerCaseEmail, newOtpCode);
@@ -374,7 +372,7 @@ public class AuthController {
             }
 
             // Check if the email is already registered
-            User existingUser = userRepository.findUserByEmail(registerRequest.getEmail());
+            User existingUser = userService.findUserByEmail(registerRequest.getEmail());
             if (existingUser != null) {
                 throw new RegistrationException("Email is already registered");
             }
@@ -474,13 +472,13 @@ public class AuthController {
             }
 
             // Check if the user exists
-            User user = userRepository.findUserByEmail(loginRequest.getEmail());
+            User user = userService.findUserByEmail(loginRequest.getEmail());
             if (user == null) {
                 throw new UserNotFoundException("User not found");
             }
 
             // Check if the user has already verified via OTP
-            boolean userVerified = otpRepository.userVerified(user.getUserId());
+            boolean userVerified = otpService.userVerified(user.getUserId());
             if (!userVerified) {
                 throw new BadRequestException("User has not been verified");
             }

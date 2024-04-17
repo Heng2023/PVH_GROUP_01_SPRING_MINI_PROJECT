@@ -5,6 +5,8 @@ import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
 import org.example.expensetracking.model.dto.response.AppUserDTO;
 
+import java.util.UUID;
+
 @Mapper
 public interface UserRepository {
     @Results(id = "UserMapping", value = {
@@ -24,6 +26,14 @@ public interface UserRepository {
         WHERE email = #{email}
     """)
     User findUserByEmail(@Param("email") String email);
+
+    @ResultMap("UserMapping")
+    @Select("""
+        SELECT * 
+        FROM users 
+        WHERE email = #{email}
+    """)
+    AppUserDTO findUserDtoByEmail(@Param("email") String email);
 
     @ResultMap("UserMapping")
     @Select("""

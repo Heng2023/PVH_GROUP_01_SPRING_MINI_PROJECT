@@ -15,6 +15,6 @@ public class Expense {
     private int amount;
     private String description;
     private Date date;
-    private UUID userId;
-    private UUID categoryId;
+    private User userId;
+    private Category categoryId;
 }

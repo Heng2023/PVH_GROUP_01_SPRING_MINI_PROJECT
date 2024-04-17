@@ -18,7 +18,9 @@ import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.security.JwtService;
 import org.example.expensetracking.service.FileService;
 import org.example.expensetracking.service.MailSenderService;
+import org.example.expensetracking.service.OtpService;
 import org.example.expensetracking.service.UserService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +30,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 @RequestMapping("/api/v1/auths")
 @RestController
@@ -41,15 +45,28 @@ public class AuthController {
     private final UserRepository userRepository;
     private final FileService fileService;
     private final OtpRepository otpRepository;
+    private final OtpService otpService;
 
     private final MailSenderService mailSenderService;
+
+    private UUID getUserIdByOtpCode(String otpCode) {
+        Date currentTime = new Date();
+        return otpRepository.findUserIdByOtpCode(otpCode, currentTime);
+    }
 
     private boolean isValidEmail(String email) {
         // Simple email format validation
         return email != null && email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
     }
 
-    @GetMapping("/verify")
+    private Date calculateExpirationDate() {
+        // Set the OTP to expire in 5 minutes
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 2);
+        return calendar.getTime();
+    }
+
+    @PutMapping("/verify")
     public ResponseEntity<?> verifyOtp(@RequestParam("otpCode") String otpCode) {
         // Get the current time to check if the OTP has expired
         Date currentTime = new Date();
@@ -69,7 +86,7 @@ public class AuthController {
         return ResponseEntity.ok("OTP verified successfully.");
     }
 
-    @PostMapping("/forget")
+    @PutMapping("/forget")
     public ResponseEntity<?> forgetPassword(@RequestParam("email") String email, @RequestBody ForgetRequest forgetRequest) throws BadRequestException {
         // Convert email to lowercase
         String lowerCaseEmail = email.toLowerCase();
@@ -116,8 +133,50 @@ public class AuthController {
     }
 
     @PostMapping("resend")
-    public String resend() {
-        return "resend";
+    public ResponseEntity<?> resendOtp(@RequestParam("email") String email) {
+        // Convert email to lowercase
+        String lowerCaseEmail = email.toLowerCase();
+
+        // Fetch user DTO by email
+        AppUserDTO userDTO = userRepository.findUserDtoByEmail(lowerCaseEmail);
+        System.out.println("Fetched user: " + userDTO); // Debug log
+
+        if (userDTO == null) {
+            // If the user is not found, return an error response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+
+        // Ensure that userId is not null
+        if (userDTO.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User ID is null.");
+        }
+
+        // Check if the user has already verified (OTP is not required)
+        boolean userVerified = otpRepository.userVerified(userDTO.getUserId());
+
+        // If the user is already verified, return a message indicating that
+        if (userVerified) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has already been verified.");
+        }
+
+        // Generate a new OTP code using OtpService
+        String newOtpCode = otpService.generateOTP(6); // Assuming you want a 6-digit OTP
+
+        // Create a new OTP object
+        Otp newOtp = new Otp();
+        newOtp.setOtpCode(newOtpCode);
+        newOtp.setIssuedAt(new Date());
+        newOtp.setExpiration(calculateExpirationDate()); // Implement this method to calculate the expiration date
+        newOtp.setUserId(userDTO.getUserId()); // Set the userId from the User object
+
+        // Save the new OTP to the database
+        otpRepository.saveOtp(newOtp);
+
+        // Send the new OTP to the user's email
+        mailSenderService.sendEmail(lowerCaseEmail, newOtpCode);
+
+        // Return a success response
+        return ResponseEntity.ok("New OTP sent successfully.");
     }
 
     @PostMapping("register")
@@ -183,7 +242,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) throws BadRequestException {
+    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) {
         try {
             // Convert email to lowercase
             String lowerCaseEmail = loginRequest.getEmail().toLowerCase();
@@ -201,9 +260,17 @@ public class AuthController {
             }
 
             // Check if the user exists
-            User user = userRepository.findUserByEmail(loginRequest.getEmail());
+            AppUserDTO user = userRepository.findUserDtoByEmail(loginRequest.getEmail());
+            System.out.println(user);
+            System.out.println(user);
             if (user == null) {
                 throw new UserNotFoundException("User not found");
+            }
+
+            //Check if the user has already verified via OTP
+            boolean userVerified = otpRepository.isUserVerified(user.getUserId());
+            if (!userVerified) {
+                throw new BadRequestException("User has not been verified");
             }
 
             // Authenticate user
@@ -215,13 +282,25 @@ public class AuthController {
             // Generate JWT token
             final String token = jwtService.generateToken(userDetails);
 
-            // Create and return authentication response
+            // Create and return authentication response with token
             AuthResponse authResponse = new AuthResponse(token);
             return ResponseEntity.ok(authResponse);
-        } catch (UserNotFoundException | BadRequestException | BlankFieldException e) {
-            throw e; // Let the GlobalExceptionHandler handle the exception
+        }  catch (UserNotFoundException e) {
+            // Handle user not found exception
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (BadRequestException e) {
+            // Handle bad request exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (BlankFieldException e) {
+            // Handle blank field exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (DataAccessException e) {
+            // Handle database access exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("An unexpected error occurred"); // Let Spring handle other unexpected exceptions
+            // Log the unexpected exception
+            e.printStackTrace(); // Or use a logging framework
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 }

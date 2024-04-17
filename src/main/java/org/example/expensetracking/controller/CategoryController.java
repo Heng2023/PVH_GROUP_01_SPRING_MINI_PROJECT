@@ -74,14 +74,29 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCategory(@Valid @RequestBody CategoryRequest categoryRequest, @PathVariable UUID id) {
+        Category category = categoryService.updateCategory(id, categoryRequest);
 
-   /* @GetMapping("/{id}")
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("You updated category successfully")
+                .payload(category)
+                .status(HttpStatus.OK)
+                .instance("/api/v1/categories")
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/{id}")
     public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         User user = userService.findUserByEmail(email);
         User user1 = userService.findUserById(user.getUserId());
-        CategoryResponse categoryResponse = categoryService.getCategoryById(user.getUserId(),categoryId);
+        Category category = categoryService.getCategoryById(user.getUserId(),categoryId);
         return ResponseEntity.ok(new ApiResponse<>(
                 "about:blank",
                 "You get all categories successfully",
@@ -90,10 +105,10 @@ public class CategoryController {
                 "/api/v1/categories",
                 new Date(),
                 null,
-                categoryResponse
+                category
         ));
 
-    }*/
+    }
 
 
 }

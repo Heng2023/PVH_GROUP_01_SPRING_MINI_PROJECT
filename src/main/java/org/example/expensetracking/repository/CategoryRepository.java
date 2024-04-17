@@ -8,6 +8,8 @@ import java.util.List;
 
 @Mapper
 public interface CategoryRepository {
+
+    //Get All Categories
     @Select("""
               SELECT * FROM categories
        LIMIT #{size}

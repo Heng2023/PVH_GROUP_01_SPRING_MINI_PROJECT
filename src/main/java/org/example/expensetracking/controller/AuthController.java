@@ -5,14 +5,15 @@ import org.apache.coyote.BadRequestException;
 import org.example.expensetracking.exceptionhandler.BlankFieldException;
 import org.example.expensetracking.exceptionhandler.RegistrationException;
 import org.example.expensetracking.exceptionhandler.UserNotFoundException;
+import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.ForgetRequest;
 import org.example.expensetracking.model.dto.request.LoginRequest;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
-import org.example.expensetracking.model.dto.response.ApiErrorResponse;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.model.dto.response.AuthResponse;
+import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.security.JwtService;
 import org.example.expensetracking.service.FileService;
@@ -28,8 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @RequestMapping("/api/v1/auths")
 @RestController
@@ -41,6 +40,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final OtpRepository otpRepository;
 
     private final MailSenderService mailSenderService;
 
@@ -49,9 +49,24 @@ public class AuthController {
         return email != null && email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
     }
 
-    @PutMapping("/verify")
-    public String verify() {
-        return "verify";
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyOtp(@RequestParam("otpCode") String otpCode) {
+        // Get the current time to check if the OTP has expired
+        Date currentTime = new Date();
+
+        // Find the OTP by its code and check if it has not expired
+        Otp otp = otpRepository.findOtpByCodeAndNotExpired(otpCode, currentTime);
+
+        if (otp == null) {
+            // If the OTP is not found or has expired, return an error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP code.");
+        }
+
+        // Update the OTP's verify field to true in the database
+        otpRepository.updateOtpVerification(otpCode);
+
+        // Return a success response
+        return ResponseEntity.ok("OTP verified successfully.");
     }
 
     @PostMapping("/forget")

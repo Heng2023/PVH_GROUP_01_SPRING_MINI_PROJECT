@@ -37,6 +37,7 @@ public class SecurityConfig{
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         return authenticationProvider;
     }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
         http

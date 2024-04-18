@@ -1,6 +1,12 @@
 package org.example.expensetracking.repository;
 
-import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.*;
+import org.example.expensetracking.configuration.UUIDTypeHandler;
+import org.example.expensetracking.model.Category;
+
+
+import java.util.List;
+import java.util.UUID;
 
 @Mapper
 public interface CategoryRepository {
@@ -20,14 +26,24 @@ public interface CategoryRepository {
     SELECT * FROM categories WHERE category_id = #{categoryId}
     AND user_id = #{userId}
     """)
-    @ResultMap("categoryMapping")
    Category getCategoryById(UUID categoryId,UUID userId);
-    //Delete Category
+
     @Select("""
-    DELETE  FROM categories WHERE category_id = #{categoryId}
-    AND user_id = #{userId}
+    INSERT INTO categories (name, description, user_id) VALUES ( #{category.name}, #{category.description}, #{userId})
     """)
-    void deleteCategoryById (UUID categoryId,UUID userId);
+    @ResultMap("categoryMapping")
+    Category insertCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
+    @Select("""
+    UPDATE categories SET name = #{category.name}, description = #{category.description}
+    WHERE category_id = #{userId}
+    """)
+    @ResultMap("categoryMapping")
+    Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
+    @Delete("""
+    DELETE FROM categories
+    WHERE category_id = #{id}
+    """)
+    void deleteCategory(UUID Id);
 }

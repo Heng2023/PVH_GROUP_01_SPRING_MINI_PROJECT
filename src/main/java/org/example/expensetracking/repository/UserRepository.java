@@ -4,7 +4,6 @@ import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.configuration.UUIDTypeHandler;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
-import org.example.expensetracking.model.dto.response.AppUserDTO;
 
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ public interface UserRepository {
         VALUES (DEFAULT,#{user.email} , #{user.password},#{user.profileImage})
         RETURNING user_id, *
     """)
-    AppUserDTO saveUser(@Param("user") RegisterRequest registerRequest);
+    User saveUser(@Param("user") RegisterRequest registerRequest);
 
     @Select("""
         SELECT *
@@ -37,11 +36,12 @@ public interface UserRepository {
         WHERE email = #{email}
         RETURNING user_id, email,password, profile_image
     """)
-    AppUserDTO updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
+   User updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
 
     @Select("""
     SELECT * FROM users WHERE user_id = #{userId}
     """)
     @ResultMap("UserMapping")
-    AppUserDTO findUserById(UUID userId);
+    User findUserById(UUID userId);
+
 }

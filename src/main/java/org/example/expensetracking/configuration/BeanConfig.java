@@ -24,12 +24,9 @@ public class BeanConfig {
 
     @Bean
     public ConfigurationCustomizer mybatisConfigurationCustomizer() {
-        return new ConfigurationCustomizer() {
-            @Override
-            public void customize(Configuration configuration) {
-                TypeHandlerRegistry registry = configuration.getTypeHandlerRegistry();
-                registry.register(UUID.class, new UUIDTypeHandler());
-            }
+        return configuration -> {
+            TypeHandlerRegistry registry = configuration.getTypeHandlerRegistry();
+            registry.register(UUID.class, new UUIDTypeHandler());
         };
     }
 }

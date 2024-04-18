@@ -1,7 +1,25 @@
 package org.example.expensetracking.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import org.apache.ibatis.annotations.Delete;
+import org.example.expensetracking.model.Category;
+import org.example.expensetracking.model.User;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
+import org.example.expensetracking.model.dto.response.ApiResponse;
+import org.example.expensetracking.model.dto.response.CategoryResponse;
+import org.example.expensetracking.service.CategoryService;
+import org.example.expensetracking.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -20,7 +38,7 @@ public class CategoryController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         User user = userService.findUserByEmail(email);
-        AppUserDTO user1 = userService.findUserById(user.getUserId());
+        User user1 = userService.findUserById(user.getUserId());
         List<CategoryResponse> categoryList = categoryService.getAllCategories(user.getUserId(), page, size);
         return ResponseEntity.ok(new ApiResponse<>(
                 "about:blank",
@@ -35,66 +53,75 @@ public class CategoryController {
 
     }
 
-    //        return ResponseEntity.ok(new ApiResponse<>(
-//                "about:blank",
-//                "You get all categories successfully",
-//                HttpStatus.OK,
-//                HttpStatus.OK.value(),
-//                "/api/v1/categories"+categoryId,
-//                new Date(),
-//                null,
-//                categoryResponse
-//        ));
-//
-//    }
-    @GetMapping("/{categoryId}")
-    public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId) {
+    @PostMapping
+    public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         User user = userService.findUserByEmail(email);
-        AppUserDTO user1 = userService.findUserById(user.getUserId());
-        CategoryResponse categoryResponse = categoryService.getCategoryById(user.getUserId(), categoryId);
-        if (categoryResponse != null) {
-            return ResponseEntity.ok(new ApiResponse<>(
-                    "about:blank",
-                    "Category get successfully",
-                    HttpStatus.OK,
-                    HttpStatus.OK.value(),
-                    "/api/v1/categories/" + categoryId,
-                    new Date(),
-                    null,
-                    categoryResponse
-            ));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        UUID currentUserId = user.getUserId();
+
+        Category category = categoryService.addCategory(categoryRequest, currentUserId);
+
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("You Created category successfully")
+                .payload(category)
+                .status(HttpStatus.CREATED)
+                .instance("/api/v1/categories")
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    ///Delete
-    @DeleteMapping("/{categoryId}")
-    public ResponseEntity<?> deleteCategoryById(@PathVariable UUID categoryId) {
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCategory(@Valid @RequestBody CategoryRequest categoryRequest, @PathVariable UUID id) {
+        Category category = categoryService.updateCategory(id, categoryRequest);
+
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("You updated category successfully")
+                .payload(category)
+                .status(HttpStatus.OK)
+                .instance("/api/v1/categories")
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable UUID id) {
+        categoryService.deleteCategory(id);
+
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("You deleted category successfully")
+                .status(HttpStatus.OK)
+                .instance("/api/v1/categories")
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         User user = userService.findUserByEmail(email);
-        AppUserDTO user1 = userService.findUserById(user.getUserId());
-
-        CategoryResponse categoryResponse = categoryService.getCategoryById(user.getUserId(), categoryId);
-        if (categoryResponse != null) {
-            categoryService.deleteCategoryById(user.getUserId(), categoryId);
-            return ResponseEntity.ok(new ApiResponse<>(
-                    "about:blank",
-                    "Category delete successfully",
-                    HttpStatus.OK,
-                    HttpStatus.OK.value(),
-                    "/api/v1/categories/" + categoryId,
-                    new Date(),
-                    null,
-                    null
-            ));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
+        User user1 = userService.findUserById(user.getUserId());
+        Category category = categoryService.getCategoryById(user.getUserId(),categoryId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                "about:blank",
+                "You get all categories successfully",
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "/api/v1/categories",
+                new Date(),
+                null,
+                category
+        ));
 
     }
+
+
 }

@@ -1,6 +1,7 @@
 package org.example.expensetracking.service.serviceimpl;
 
 import org.example.expensetracking.model.Category;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
 import org.example.expensetracking.model.dto.response.CategoryResponse;
 import org.example.expensetracking.repository.CategoryRepository;
 import org.example.expensetracking.service.CategoryService;
@@ -22,6 +23,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Category addCategory(CategoryRequest categoryRequest, UUID userId) {
+        return categoryRepository.insertCategory(categoryRequest, userId);
+    }
+
+    @Override
     public List<CategoryResponse> getAllCategories(UUID userId, Integer page, Integer size) {
         System.out.println("adskady98q36er2342");
         List<Category> categoryList = categoryRepository.getAllCategories(userId,page,size);
@@ -35,14 +41,26 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponse getCategoryById(UUID userId, UUID categoryId) {
+    public Category updateCategory(UUID id, CategoryRequest categoryRequest) {
+        Category category = categoryRepository.UpdateCategory(categoryRequest, id);
+        return category;
+    }
+
+    @Override
+    public Category getCategoryById(UUID userId, UUID categoryId) {
         Category category = categoryRepository.getCategoryById(categoryId, userId);
         if (category != null) {
-            return modelMapper.map(category, CategoryResponse.class);
+            return category;
         } else {
 
             return null;
-        }}
+        }
+    }
+
+    @Override
+    public void deleteCategory(UUID id) {
+        categoryRepository.deleteCategory(id);
+    }
 
     @Override
     public void deleteCategoryById(UUID userId, UUID categoryId) {

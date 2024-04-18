@@ -4,7 +4,6 @@ import org.example.expensetracking.model.CustomUserDetails;
 import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
-import org.example.expensetracking.model.dto.response.AppUserDTO;
 import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.service.MailSenderService;
@@ -65,8 +64,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updatePasswordByEmail(String email, String encodedPassword) {
-        return userRepository.updatePasswordByEmail(email, encodedPassword);
+    public AppUserDTO findUserById(UUID userId) {
+        return userRepository.findUserById(userId);
     }
 
     @Override

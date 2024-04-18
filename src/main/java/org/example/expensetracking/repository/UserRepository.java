@@ -41,4 +41,11 @@ public interface UserRepository {
     """)
     @ResultMap("UserMapping")
     User findUserById(UUID userId);
-}
+
+    @ResultMap("UserMapping")
+    @Select("""
+        SELECT * 
+        FROM users 
+        WHERE profile_image = #{profileImage}
+    """)
+    User findUserByProfileImage(@Param("profileImage") String profileImage);}

@@ -3,6 +3,7 @@ package org.example.expensetracking.repository;
 import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.configuration.UUIDTypeHandler;
 import org.example.expensetracking.model.Category;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
 
 
 import java.util.List;
@@ -34,4 +35,21 @@ public interface CategoryRepository {
     AND user_id = #{userId}
     """)
     void deleteCategoryById (UUID categoryId,UUID userId);
+
+    @Select("""
+        INSERT INTO categories (name, description, user_id) 
+        VALUES ( #{category.name}, #{category.description}, #{userId})
+        RETURNING *
+    """)
+    @ResultMap("categoryMapping")
+    Category insertCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
+
+    @Select("""
+        UPDATE categories 
+        SET name = #{category.name}, description = #{category.description}
+        WHERE category_id = #{userId}
+        RETURNING *
+    """)
+    @ResultMap("categoryMapping")
+    Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 }

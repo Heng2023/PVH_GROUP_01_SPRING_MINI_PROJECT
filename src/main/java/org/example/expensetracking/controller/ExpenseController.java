@@ -2,6 +2,7 @@ package org.example.expensetracking.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.apache.ibatis.annotations.Delete;
 import org.example.expensetracking.model.Category;
 import org.example.expensetracking.model.Expense;
 import org.example.expensetracking.model.User;
@@ -53,6 +54,7 @@ public class ExpenseController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping
     public ResponseEntity<?> getAllExpenses() {
         List<Expense> expenses = expenseService.findAllExpense();
@@ -68,4 +70,72 @@ public class ExpenseController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getExpenseById(@PathVariable("id") UUID expenseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userService.findUserByEmail(email);
+        UUID userId = user.getUserId();
+
+        Expense expenses = expenseService.findExpenseById(userId, expenseId);
+        System.out.println(userId+ " "+ expenseId);
+
+        ApiResponse<?> response = ApiResponse
+                .builder()
+                .message("Successfully get expense")
+                .payload(expenses)
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateExpense(@PathVariable("id") UUID expenseId,
+                                           @Valid @RequestBody ExpenseRequest expenseRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userService.findUserByEmail(email);
+        UUID userId = user.getUserId();
+
+        Expense expense = expenseService.updateExpanse(userId, expenseRequest);
+
+        ApiResponse<?> response = ApiResponse
+                .builder()
+                .message("Successfully get expense")
+                .payload(expense)
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteExpense(@PathVariable("id") UUID expenseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userService.findUserByEmail(email);
+        UUID userId = user.getUserId();
+
+        expenseService.deleteExpanse(userId, expenseId);
+
+        ApiResponse<?> response = ApiResponse
+                .builder()
+                .message("Successfully get expense")
+                .payload(null)
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+
+    }
+
 }

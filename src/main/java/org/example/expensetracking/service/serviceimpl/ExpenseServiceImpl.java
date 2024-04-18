@@ -26,4 +26,19 @@ public class ExpenseServiceImpl implements ExpenseService {
     public List<Expense> findAllExpense() {
         return expenseRepository.findAllExpense();
     }
+
+    @Override
+    public Expense updateExpanse(UUID userId, ExpenseRequest expenseRequest) {
+        return expenseRepository.updateExpense(userId, expenseRequest);
+    }
+
+    @Override
+    public void deleteExpanse(UUID userId, UUID expanseId) {
+        expenseRepository.deleteExpense(userId, expanseId);
+    }
+
+    @Override
+    public Expense findExpenseById(UUID userId, UUID expanseId) {
+        return expenseRepository.getExpenseById(userId, expanseId);
+    }
 }

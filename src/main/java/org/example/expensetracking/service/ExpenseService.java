@@ -11,4 +11,10 @@ public interface ExpenseService {
     ExpenseRequest insertExpense(ExpenseRequest expenseRequest, UUID userId);
 
     List<Expense> findAllExpense();
+
+    Expense updateExpanse(UUID userId, ExpenseRequest expenseRequest);
+
+    void deleteExpanse(UUID userId, UUID expanseId);
+
+    Expense findExpenseById(UUID userId, UUID id);
 }

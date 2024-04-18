@@ -28,7 +28,7 @@ public interface ExpenseRepository {
     RETURNING *
     """)
     @Result(property = "categoryId", column = "category_id")
-    ExpenseRequest updateExpense(ExpenseRequest expenseRequest, UUID userId);
+    Expense updateExpense(UUID userId, ExpenseRequest expenseRequest);
 
     @Select("""
     SELECT * FROM expenses

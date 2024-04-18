@@ -23,6 +23,28 @@ public interface ExpenseRepository {
 
 
     @Select("""
+    UPDATE expenses set amount = #{amount} , description = #{description} , category_id = #{categoryId}
+    WHERE user_id = #{userId} AND  expense_id = #{expenseId}
+    RETURNING *
+    """)
+    @Result(property = "categoryId", column = "category_id")
+    ExpenseRequest updateExpense(ExpenseRequest expenseRequest, UUID userId);
+
+    @Select("""
+    SELECT * FROM expenses
+    WHERE user_id = #{userId} AND expense_id = #{expenseId}
+    """)
+    Expense getExpenseById(UUID userId, UUID expenseId);
+
+
+    @Delete("""
+    DELETE FROM expenses
+    WHERE user_id = #{userId} AND expense_id = #{expenseId}
+    """)
+    void deleteExpense(UUID userId, UUID expenseId);
+
+
+    @Select("""
     SELECT * FROM expenses
     """)
     @Results(id = "expanseMapping", value = {
@@ -36,4 +58,6 @@ public interface ExpenseRepository {
 
     })
     List<Expense> findAllExpense();
+
+
 }

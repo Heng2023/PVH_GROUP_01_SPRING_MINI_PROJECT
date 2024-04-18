@@ -1,5 +1,6 @@
 package org.example.expensetracking.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.example.expensetracking.model.dto.response.ApiFileResponse;
 import org.example.expensetracking.model.dto.response.FileResponse;
 import org.example.expensetracking.service.FileService;
@@ -16,6 +17,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/files")
+@SecurityRequirement(name = "bearerAuth")
 public class AppFileController {
 
     private final FileService fileService;

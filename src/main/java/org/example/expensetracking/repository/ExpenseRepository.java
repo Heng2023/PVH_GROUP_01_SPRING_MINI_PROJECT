@@ -15,11 +15,11 @@ public interface ExpenseRepository {
 
     @Select("""
     INSERT INTO expenses (amount, description, date, user_id, category_id)
-    VALUES (#{expense.amount}, #{expense.description},#{expense.date}, #{userId}, #{categoryId})
+    VALUES (#{expense.amount}, #{expense.description},#{expense.date}, #{userId}, #{expense.categoryId})
     RETURNING *
     """)
-    @ResultMap("expanseMapping")
-    Expense saveExpense(@Param("expense") ExpenseRequest expenseRequest, UUID userId);
+    @Result(property = "categoryId", column = "category_id")
+    ExpenseRequest saveExpense(@Param("expense") ExpenseRequest expenseRequest, UUID userId);
 
 
     @Select("""
@@ -32,7 +32,8 @@ public interface ExpenseRepository {
             ),
             @Result(property = "category", column = "category_id",
                     one = @One(select = "org.example.expensetracking.repository.CategoryRepository.findCategoryById")
-            )
+            ),
+
     })
     List<Expense> findAllExpense();
 }

@@ -33,13 +33,13 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addExpense(@Valid @RequestBody ExpenseRequest expenseRequest, UUID categoryId) {
+    public ResponseEntity<?> addExpense(@Valid @RequestBody ExpenseRequest expenseRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userService.findUserByEmail(email);
 
 
-        Expense expense = expenseService.insertExpense(expenseRequest, user.getUserId());
+        ExpenseRequest expense = expenseService.insertExpense(expenseRequest, user.getUserId());
 
         ApiResponse<?> response = ApiResponse
                 .builder()

@@ -18,7 +18,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public Expense insertExpense(ExpenseRequest expenseRequest, UUID userId) {
+    public ExpenseRequest insertExpense(ExpenseRequest expenseRequest, UUID userId) {
         return expenseRepository.saveExpense(expenseRequest, userId);
     }
 

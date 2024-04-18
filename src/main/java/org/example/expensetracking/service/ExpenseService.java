@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface ExpenseService {
 
-    Expense insertExpense(ExpenseRequest expenseRequest, UUID userId);
+    ExpenseRequest insertExpense(ExpenseRequest expenseRequest, UUID userId);
 
     List<Expense> findAllExpense();
 }

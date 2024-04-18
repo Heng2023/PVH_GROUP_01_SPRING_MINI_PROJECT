@@ -29,9 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponse> getAllCategories(UUID userId, Integer page, Integer size) {
-        System.out.println("adskady98q36er2342");
         List<Category> categoryList = categoryRepository.getAllCategories(userId,page,size);
-        System.out.println("asdadsadad"+categoryList);
         List<CategoryResponse> categoryResponses = new ArrayList<>();
         for(Category category : categoryList){
             CategoryResponse categoryResponse = modelMapper.map(category, CategoryResponse.class);

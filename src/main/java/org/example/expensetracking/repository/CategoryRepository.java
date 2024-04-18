@@ -35,6 +35,7 @@ public interface CategoryRepository {
     @ResultMap("categoryMapping")
     Category insertCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
+    //Update Category By Id
     @Select("""
     UPDATE categories SET name = #{category.name}, description = #{category.description}
     WHERE category_id = #{userId}
@@ -42,6 +43,7 @@ public interface CategoryRepository {
     @ResultMap("categoryMapping")
     Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
+    // Delete Category By Id
     @Delete("""
     DELETE FROM categories
     WHERE category_id = #{id}

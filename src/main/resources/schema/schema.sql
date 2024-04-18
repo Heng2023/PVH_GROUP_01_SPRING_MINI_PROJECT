@@ -38,4 +38,4 @@ CREATE TABLE expenses(
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
-DELETE FROM categories WHERE category_id =
+

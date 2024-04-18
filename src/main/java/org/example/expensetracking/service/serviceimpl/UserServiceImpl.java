@@ -4,6 +4,7 @@ import org.example.expensetracking.model.CustomUserDetails;
 import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
+import org.example.expensetracking.model.dto.response.UserResponse;
 import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.service.MailSenderService;

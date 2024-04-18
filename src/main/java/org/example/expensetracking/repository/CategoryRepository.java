@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Mapper
 public interface CategoryRepository {
+
     @Select("""
        SELECT * FROM categories WHERE user_id = #{userId}
        LIMIT #{size}
@@ -22,7 +23,8 @@ public interface CategoryRepository {
             one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserById"))
     })
     List<Category> getAllCategories(UUID userId, Integer page, Integer size);
-    //Get Category BY ID
+
+
     @Select("""
     SELECT * FROM categories WHERE category_id = #{categoryId}
     AND user_id = #{userId}
@@ -30,7 +32,8 @@ public interface CategoryRepository {
    Category getCategoryById(UUID categoryId,UUID userId);
 
     @Select("""
-    INSERT INTO categories (name, description, user_id) VALUES ( #{category.name}, #{category.description}, #{userId})
+    INSERT INTO categories (name, description, user_id)
+    VALUES ( #{category.name}, #{category.description}, #{userId})
     """)
     @ResultMap("categoryMapping")
     Category insertCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
@@ -47,4 +50,10 @@ public interface CategoryRepository {
     WHERE category_id = #{id}
     """)
     void deleteCategory(UUID Id);
+
+    @Select("""
+    SELECT * FROM categories
+    WHERE category_id = #{categoryId}
+    """)
+    Category findCategoryById(UUID categoryId);
 }

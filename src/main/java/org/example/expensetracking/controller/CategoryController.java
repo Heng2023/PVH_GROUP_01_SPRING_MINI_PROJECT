@@ -3,6 +3,7 @@ package org.example.expensetracking.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.apache.ibatis.annotations.Delete;
 import org.example.expensetracking.model.Category;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.CategoryRequest;
@@ -81,6 +82,20 @@ public class CategoryController {
         ApiResponse<?> response = ApiResponse.builder()
                 .message("You updated category successfully")
                 .payload(category)
+                .status(HttpStatus.OK)
+                .instance("/api/v1/categories")
+                .timestamp(new Date())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable UUID id) {
+        categoryService.deleteCategory(id);
+
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("You deleted category successfully")
                 .status(HttpStatus.OK)
                 .instance("/api/v1/categories")
                 .timestamp(new Date())

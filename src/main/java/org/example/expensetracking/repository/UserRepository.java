@@ -43,5 +43,6 @@ public interface UserRepository {
     SELECT * FROM users WHERE user_id = #{userId}
     """)
     @ResultMap("UserMapping")
-   User findUserById(UUID userId);
+    User findUserById(UUID userId);
+
 }

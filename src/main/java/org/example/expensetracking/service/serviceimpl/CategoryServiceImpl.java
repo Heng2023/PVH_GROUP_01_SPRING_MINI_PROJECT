@@ -42,7 +42,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category updateCategory(UUID id, CategoryRequest categoryRequest) {
-        return null;
+        Category category = categoryRepository.UpdateCategory(categoryRequest, id);
+        return category;
     }
 
     @Override
@@ -56,11 +57,9 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-
-
     @Override
-    public void deleteCategory(Integer id) {
-
+    public void deleteCategory(UUID id) {
+        categoryRepository.deleteCategory(id);
     }
 
 

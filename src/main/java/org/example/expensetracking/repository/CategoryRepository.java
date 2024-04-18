@@ -42,4 +42,9 @@ public interface CategoryRepository {
     @ResultMap("categoryMapping")
     Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
+    @Delete("""
+    DELETE FROM categories
+    WHERE category_id = #{id}
+    """)
+    void deleteCategory(UUID Id);
 }

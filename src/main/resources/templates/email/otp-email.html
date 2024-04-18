@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your OTP for Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .logo {
+            width: 250px;
+            height: auto;
+        }
+        .otp {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <img src="https://download.logo.wine/logo/Spring_Framework/Spring_Framework-Logo.wine.png" alt="Spring Logo" class="logo"/>
+    <h1>Your OTP for Email Verification</h1>
+    <p class="otp" th:text="${otp}">Your OTP is: 123456</p>
+    <p>Please use this OTP for verification.</p>
+</div>
+</body>
+</html>

@@ -36,12 +36,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AppUserDTO createUser(RegisterRequest registerRequest) {
+    public User createUser(RegisterRequest registerRequest) {
         // Generate OTP
         String otp = otpService.generateOTP(6); // Assuming 6-digit OTP
 
         // Proceed with user registration and retrieve the user ID
-        AppUserDTO savedUser = userRepository.saveUser(registerRequest);
+        User savedUser = userRepository.saveUser(registerRequest);
         UUID userId = savedUser.getUserId();
         System.out.println(userId);
 
@@ -65,8 +65,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AppUserDTO findUserById(UUID userId) {
-        return userRepository.findUserById(userId);
+    public User updatePasswordByEmail(String email, String encodedPassword) {
+        return userRepository.updatePasswordByEmail(email, encodedPassword);
     }
 
     @Override

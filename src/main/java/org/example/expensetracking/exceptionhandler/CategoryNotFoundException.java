@@ -1,0 +1,7 @@
+package org.example.expensetracking.exceptionhandler;
+
+public class CategoryNotFoundException extends RuntimeException {
+    public CategoryNotFoundException(String message) {
+        super(message);
+    }
+}

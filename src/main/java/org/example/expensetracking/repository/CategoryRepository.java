@@ -1,12 +1,6 @@
 package org.example.expensetracking.repository;
 
-import org.apache.ibatis.annotations.*;
-import org.example.expensetracking.configuration.UUIDTypeHandler;
-import org.example.expensetracking.model.Category;
-
-
-import java.util.List;
-import java.util.UUID;
+import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface CategoryRepository {

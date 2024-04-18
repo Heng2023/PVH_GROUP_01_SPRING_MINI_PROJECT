@@ -28,4 +28,21 @@ public interface OtpRepository {
         AND expiration > #{currentTime}
     """)
     Otp findOtpByCodeAndNotExpired(@Param("otpCode") String otpCode, @Param("currentTime") Date currentTime);
+
+    @Select("""
+    SELECT user_id
+        FROM otps
+        WHERE otp_code = #{otpCode} 
+        AND expiration > #{currentTime}
+    """)
+    UUID findUserIdByOtpCode(@Param("otpCode") String otpCode, @Param("currentTime") Date currentTime);
+
+    @Select("""
+        SELECT COUNT(*) > 0
+        FROM otps
+        WHERE user_id = #{userId} 
+        AND verify = true
+        LIMIT 1
+    """)
+    boolean userVerified(@Param("userId") UUID userId);
 }

@@ -1,7 +1,6 @@
 package org.example.expensetracking.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.constraints.Positive;
 import org.example.expensetracking.exceptionhandler.CategoryNotFoundException;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.response.ApiErrorResponse;
@@ -33,15 +32,42 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllCategories(@Positive @RequestParam(defaultValue = "1") Integer page, @Positive @RequestParam(defaultValue = "2") Integer size) {
+    public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "2") Integer size) {
+        if (page <= 0 || size <= 0) {
+            // Invalid parameter values
+            return ResponseEntity.badRequest().body(new ApiErrorResponse(
+                    "about:blank",
+                    "Invalid Parameters",
+                    HttpStatus.BAD_REQUEST,
+                    400,
+                    "/api/v1/categories",
+                    new Date(),
+                    Collections.singletonMap("error", "Page and Size must be greater than zero")
+            ));
+        }
+
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
             User user = userService.findUserByEmail(email);
             List<CategoryResponse> categoryList = categoryService.getAllCategories(user.getUserId(), page, size);
+
+            if (categoryList.isEmpty()) {
+                // No categories found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiErrorResponse(
+                        "about:blank",
+                        "No categories found",
+                        HttpStatus.NOT_FOUND,
+                        404,
+                        "/api/v1/categories",
+                        new Date(),
+                        Collections.singletonMap("error", "No categories found")
+                ));
+            }
+
             return ResponseEntity.ok(new ApiResponse<>(
                     "about:blank",
-                    "You get all categories successfully",
+                    "Get all categories successfully",
                     HttpStatus.OK,
                     HttpStatus.OK.value(),
                     "/api/v1/categories?page=" + page + "&size=" + size,
@@ -49,8 +75,6 @@ public class CategoryController {
                     null,
                     categoryList
             ));
-        } catch (CategoryNotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiErrorResponse(
@@ -83,7 +107,15 @@ public class CategoryController {
                     categoryResponse
             ));
         } catch (CategoryNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiErrorResponse(
+                    "about:blank",
+                    "Category Not Found",
+                    HttpStatus.NOT_FOUND,
+                    404,
+                    "/api/v1/categories/" + categoryId,
+                    new Date(),
+                    Collections.singletonMap("error", "Category not found")
+            ));
         }
     }
 
@@ -105,7 +137,15 @@ public class CategoryController {
                     null
             ));
         } catch (CategoryNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiErrorResponse(
+                    "about:blank",
+                    "Category Not Found",
+                    HttpStatus.NOT_FOUND,
+                    404,
+                    "/api/v1/categories/" + categoryId,
+                    new Date(),
+                    Collections.singletonMap("error", "Category not found")
+            ));
         }
     }
 }

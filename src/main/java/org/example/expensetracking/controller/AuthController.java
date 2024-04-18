@@ -13,8 +13,6 @@ import org.example.expensetracking.model.dto.request.RegisterRequest;
 import org.example.expensetracking.model.dto.response.ApiErrorResponse;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.model.dto.response.AuthResponse;
-import org.example.expensetracking.repository.OtpRepository;
-import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.security.JwtService;
 import org.example.expensetracking.service.FileService;
 import org.example.expensetracking.service.MailSenderService;

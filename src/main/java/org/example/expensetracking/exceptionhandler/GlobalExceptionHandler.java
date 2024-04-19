@@ -1,3 +1,4 @@
+
 package org.example.expensetracking.exceptionhandler;
 
 import org.apache.coyote.BadRequestException;

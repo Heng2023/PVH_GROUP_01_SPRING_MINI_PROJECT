@@ -26,6 +26,11 @@ public class CategoryServiceImpl implements CategoryService {
     public Category addCategory(CategoryRequest categoryRequest, UUID userId) {
         return categoryRepository.insertCategory(categoryRequest, userId);
     }
+    @Override
+    public Category updateCategory(UUID id, CategoryRequest categoryRequest) {
+        Category category = categoryRepository.UpdateCategory(categoryRequest, id);
+        return category;
+    }
 
     @Override
     public List<CategoryResponse> getAllCategories(UUID userId, Integer page, Integer size) {
@@ -40,27 +45,17 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryResponses;
     }
 
-    @Override
-    public Category updateCategory(UUID id, CategoryRequest categoryRequest) {
-        Category category = categoryRepository.UpdateCategory(categoryRequest, id);
-        return category;
-    }
+
 
     @Override
-    public Category getCategoryById(UUID userId, UUID categoryId) {
+    public CategoryResponse getCategoryById(UUID userId, UUID categoryId) {
         Category category = categoryRepository.getCategoryById(categoryId, userId);
         if (category != null) {
-            return category;
+            return modelMapper.map(category, CategoryResponse.class);
         } else {
 
             return null;
-        }
-    }
-
-    @Override
-    public void deleteCategory(UUID id) {
-        categoryRepository.deleteCategory(id);
-    }
+        }}
 
     @Override
     public void deleteCategoryById(UUID userId, UUID categoryId) {

@@ -3,6 +3,7 @@ package org.example.expensetracking.repository;
 import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.configuration.UUIDTypeHandler;
 import org.example.expensetracking.model.Category;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
 
 
 import java.util.List;
@@ -22,12 +23,13 @@ public interface CategoryRepository {
     })
     List<Category> getAllCategories(UUID userId, Integer page, Integer size);
     //Get Category BY ID
-    @Select("""
-    SELECT * FROM categories WHERE category_id = #{categoryId}
-    AND user_id = #{userId}
-    """)
-   Category getCategoryById(UUID categoryId,UUID userId);
 
+    @Select("""
+        SELECT * FROM categories WHERE category_id = #{categoryId}
+        AND user_id = #{userId}
+        """)
+    @ResultMap("categoryMapping")
+    Category getCategoryById(UUID categoryId,UUID userId);
     @Select("""
     INSERT INTO categories (name, description, user_id) VALUES ( #{category.name}, #{category.description}, #{userId})
     """)
@@ -41,9 +43,12 @@ public interface CategoryRepository {
     @ResultMap("categoryMapping")
     Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
-    @Delete("""
-    DELETE FROM categories
-    WHERE category_id = #{id}
-    """)
-    void deleteCategory(UUID Id);
+
+
+        //Delete Category
+        @Select("""
+        DELETE  FROM categories WHERE category_id = #{categoryId}
+        AND user_id = #{userId}
+        """)
+        void deleteCategoryById (UUID categoryId,UUID userId);
 }

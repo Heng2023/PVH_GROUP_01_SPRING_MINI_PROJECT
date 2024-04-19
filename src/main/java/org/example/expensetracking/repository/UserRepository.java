@@ -36,12 +36,11 @@ public interface UserRepository {
         WHERE email = #{email}
         RETURNING user_id, email,password, profile_image
     """)
-   User updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
+    User updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
 
     @Select("""
     SELECT * FROM users WHERE user_id = #{userId}
     """)
     @ResultMap("UserMapping")
     User findUserById(UUID userId);
-
 }

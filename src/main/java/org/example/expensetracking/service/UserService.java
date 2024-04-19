@@ -10,4 +10,5 @@ public interface UserService extends UserDetailsService {
     User createUser(RegisterRequest registerRequest);
     User findUserById(UUID userId);
     User findUserByEmail(String email);
+    User updatePasswordByEmail(String email, String encodedPassword);
 }

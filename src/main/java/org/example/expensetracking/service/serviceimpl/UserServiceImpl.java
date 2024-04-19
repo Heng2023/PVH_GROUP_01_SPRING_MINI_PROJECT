@@ -64,8 +64,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AppUserDTO findUserById(UUID userId) {
-        return userRepository.findUserById(userId);
+    public User findUserById(UUID userId) {
+        return null;
+    }
+
+    @Override
+    public User updatePasswordByEmail(String email, String encodedPassword) {
+        return userRepository.updatePasswordByEmail(email, encodedPassword);
     }
 
     @Override

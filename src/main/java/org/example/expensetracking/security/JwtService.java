@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Component
 public class JwtService {
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
-    public static final String SECRET = "3445f76b8b7c0ff73d2f38a33a6c3b9b59b9d5e0ff9460b9935ab56dbc888c64";
+    public static final String SECRET = "3445f678dfsd9f9879sdf0sdf6789sdfdsf6b8b7c0ff73d2ff9460b9935ab56dbc888c64";
 
     private String createToken(Map<String, Object> claim, String subject) {
         return Jwts.builder()

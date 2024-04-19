@@ -2,6 +2,7 @@ package org.example.expensetracking.configuration;
 
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.example.expensetracking.model.Category;
 import org.modelmapper.ModelMapper;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;

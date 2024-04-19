@@ -3,13 +3,14 @@ package org.example.expensetracking.repository;
 import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
+import org.example.expensetracking.model.dto.response.UserResponse;
 
 import java.util.UUID;
 
 @Mapper
 public interface UserRepository {
     @Results(id = "UserMapping", value = {
-            @Result(property = "userId", column = "user_id"), // Map userId column to userId property
+            @Result(property = "userId", column = "user_id"),
             @Result(property = "profileImage", column = "profile_image")
     })
     @Select("""
@@ -37,7 +38,7 @@ public interface UserRepository {
     User updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
 
     @Select("""
-    SELECT * FROM users WHERE user_id = #{userId}
+        SELECT * FROM users WHERE user_id = #{userId}
     """)
     @ResultMap("UserMapping")
     User findUserById(UUID userId);

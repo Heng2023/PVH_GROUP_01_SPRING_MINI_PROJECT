@@ -16,23 +16,33 @@ public interface CategoryRepository {
        LIMIT #{size}
        OFFSET #{size} * (#{page} - 1)
        """)
-    @Results(id = "categoryMapping", value = {
-            @Result(property = "categoryID",column = "category_id",typeHandler = UUIDTypeHandler.class),
-            @Result(property = "userId",column = "user_id",
-                    one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserById"))
-    })
+    @ResultMap("categoryResultMap")
     List<Category> getAllCategories(UUID userId, Integer page, Integer size);
 
     @Select("""
     SELECT * FROM categories WHERE category_id = #{categoryId}
     AND user_id = #{userId}
     """)
-    @ResultMap("categoryMapping")
+    @Results(id = "categoryResultMap", value = {
+            @Result(property = "categoryID", column = "category_id", typeHandler = UUIDTypeHandler.class),
+            @Result(property = "name", column = "name"),
+            @Result(property = "description", column = "description"),
+            @Result(property = "userId", column = "user_id",
+                    one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserById"))
+    })
     Category getCategoryById(UUID categoryId,UUID userId);
 
     @Select("""
-    DELETE  FROM categories WHERE category_id = #{categoryId}
-    AND user_id = #{userId}
+        SELECT * 
+        FROM categories 
+        WHERE category_id = #{categoryId}
+    """)
+    @ResultMap("categoryResultMap")
+    Category findCategoryById(UUID categoryId);
+
+    @Select("""
+        DELETE  FROM categories WHERE category_id = #{categoryId}
+        AND user_id = #{userId}
     """)
     void deleteCategoryById (UUID categoryId,UUID userId);
 
@@ -41,7 +51,7 @@ public interface CategoryRepository {
         VALUES ( #{category.name}, #{category.description}, #{userId})
         RETURNING *
     """)
-    @ResultMap("categoryMapping")
+    @ResultMap("categoryResultMap")
     Category insertCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 
     @Select("""
@@ -50,6 +60,6 @@ public interface CategoryRepository {
         WHERE category_id = #{userId}
         RETURNING *
     """)
-    @ResultMap("categoryMapping")
+    @ResultMap("categoryResultMap")
     Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
 }

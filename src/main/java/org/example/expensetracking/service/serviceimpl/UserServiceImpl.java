@@ -6,6 +6,7 @@ import org.example.expensetracking.model.CustomUserDetails;
 import org.example.expensetracking.model.Otp;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
+import org.example.expensetracking.model.dto.response.UserResponse;
 import org.example.expensetracking.repository.OtpRepository;
 import org.example.expensetracking.repository.UserRepository;
 import org.example.expensetracking.service.FileService;
@@ -16,8 +17,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,6 +34,7 @@ public class UserServiceImpl implements UserService {
         this.mailSenderService = mailSenderService;
         this.fileService = fileService;
     }
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findUserByEmail(email);

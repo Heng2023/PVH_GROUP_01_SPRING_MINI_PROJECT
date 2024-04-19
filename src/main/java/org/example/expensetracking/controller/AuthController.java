@@ -13,6 +13,7 @@ import org.example.expensetracking.model.dto.request.RegisterRequest;
 import org.example.expensetracking.model.dto.response.ApiErrorResponse;
 import org.example.expensetracking.model.dto.response.ApiResponse;
 import org.example.expensetracking.model.dto.response.AuthResponse;
+import org.example.expensetracking.model.dto.response.UserResponse;
 import org.example.expensetracking.security.JwtService;
 import org.example.expensetracking.service.FileService;
 import org.example.expensetracking.service.MailSenderService;
@@ -54,6 +55,16 @@ public class AuthController {
     private boolean isValidEmail(String email) {
         // Simple email format validation
         return email != null && email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+    }
+
+
+    public UserResponse mapUserToUserResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setUserId(user.getUserId());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setProfileImage(user.getProfileImage());
+        // Map other fields as necessary
+        return userResponse;
     }
 
     private Date calculateExpirationDate() {
@@ -156,19 +167,18 @@ public class AuthController {
             // Encrypt the new password
             String encodedPassword = passwordEncoder.encode(password);
 
-            // Update user's password and fetch updated user details
-            // Note: Ensure that the updatePasswordByEmail method in your UserRepository also uses the lowerCaseEmail for comparison
-            User updatedUserDTO = userService.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
+            // After updating the user's password
+            User updatedUser = userService.updatePasswordByEmail(lowerCaseEmail, encodedPassword);
+            UserResponse updatedUserResponse = mapUserToUserResponse(updatedUser);
 
-            // Build user response DTO
-            ApiResponse<User> response = ApiResponse.<User>builder()
+            ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
                     .type("about:blank")
                     .message("Password reset successful")
                     .status(HttpStatus.OK)
                     .code(HttpStatus.OK.value())
                     .instance("/api/v1/auths/forget")
                     .timestamp(new Date())
-                    .payload(updatedUserDTO) // Include updated user details in payload
+                    .payload(updatedUserResponse) // Use UserResponse instead of User
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -391,17 +401,19 @@ public class AuthController {
             // If all validations pass, proceed with registration
             String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
             registerRequest.setPassword(encodedPassword);
-            User appUserDTO = userService.createUser(registerRequest);
+            // After creating the user
+            User appUser = userService.createUser(registerRequest);
+            UserResponse appUserResponse = mapUserToUserResponse(appUser);
 
             // Return ApiResponse for successful registration
-            ApiResponse<User> response = ApiResponse.<User>builder()
+            ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
                     .type("about:blank")
                     .message("Successfully Registered")
                     .code(HttpStatus.CREATED.value())
                     .status(HttpStatus.CREATED)
                     .instance("/api/v1/auths/register")
                     .timestamp(new Date())
-                    .payload(appUserDTO)
+                    .payload(appUserResponse)
                     .build();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

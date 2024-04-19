@@ -54,9 +54,7 @@ public class ExpenseController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            // Log the exception
             System.err.println("Error adding expense: " + e.getMessage());
-            // Return a custom error response
             ApiResponse<?> errorResponse = ApiResponse
                     .builder()
                     .message("Error adding expense: " + e.getMessage())
@@ -68,7 +66,6 @@ public class ExpenseController {
         }
     }
 
-    // Similar try-catch blocks for other methods...
 
     @GetMapping
     public ResponseEntity<?> getAllExpenses() {
@@ -90,7 +87,6 @@ public class ExpenseController {
             e.printStackTrace();
             // Log the exception
             System.err.println("Error getting expenses: " + e.getMessage());
-            // Return a custom error response
             ApiResponse<?> errorResponse = ApiResponse
                     .builder()
                     .message("Error getting expenses: " + e.getMessage())
@@ -113,16 +109,20 @@ public class ExpenseController {
         System.out.println(userId+ " "+ expenseId);
         System.out.println(expenses);
 
-        ApiResponse<?> response = ApiResponse
-                .builder()
-                .message("Successfully get expense")
-                .payload(expenses)
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .timestamp(new Date())
-                .build();
-
-        return ResponseEntity.ok(response);
+        if (expenses != null) {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    "about:blank",
+                    "Expense get successfully",
+                    HttpStatus.OK,
+                    HttpStatus.OK.value(),
+                    "/api/v1/expense/" + expenses,
+                    new Date(),
+                    null,
+                    expenses
+            ));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}")

@@ -1,5 +1,6 @@
 package org.example.expensetracking.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -38,6 +39,7 @@ public class CategoryController {
     }
 
     @GetMapping
+    @Operation(summary = "read all category")
     public ResponseEntity<?> getAllCategories(@Positive @RequestParam(defaultValue = "1") Integer page, @Positive @RequestParam(defaultValue = "2") Integer size) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
@@ -57,6 +59,7 @@ public class CategoryController {
 
     }
     @GetMapping("/{categoryId}")
+    @Operation(summary = "read category by id")
     public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
@@ -82,6 +85,7 @@ public class CategoryController {
 
     ///Delete
     @DeleteMapping("/{categoryId}")
+    @Operation(summary = "delete category")
     public ResponseEntity<?> deleteCategoryById(@PathVariable UUID categoryId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
@@ -107,6 +111,7 @@ public class CategoryController {
     }
         //Insert
     @PostMapping
+    @Operation(summary = "insert category")
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
@@ -130,6 +135,7 @@ public class CategoryController {
 
     //Update
    @PutMapping("/{categoryId}")
+   @Operation(summary = "update category")
    public ResponseEntity<?> updateCategory(@Valid @RequestBody CategoryRequest categoryRequest, @PathVariable UUID categoryId) {
        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
        String email = auth.getName();

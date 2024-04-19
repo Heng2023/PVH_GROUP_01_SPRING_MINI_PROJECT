@@ -3,6 +3,7 @@ package org.example.expensetracking.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.expensetracking.model.dto.response.ExpenseResponse;
 
 import java.util.Date;
 import java.util.UUID;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Expense {
     private UUID expenseId;
-    private int amount;
+    private double amount;
     private String description;
     private Date date;
     private User user;

@@ -17,7 +17,7 @@ public interface CategoryRepository {
        OFFSET #{size} * (#{page} - 1)
        """)
     @Results(id = "categoryMapping", value = {
-            @Result(property = "categoryID",column = "category_id",typeHandler = UUIDTypeHandler.class),
+            @Result(property = "categoryId",column = "category_id",typeHandler = UUIDTypeHandler.class),
             @Result(property = "userId",column = "user_id",
                     one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserById"))
     })
@@ -52,4 +52,6 @@ public interface CategoryRepository {
     """)
     @ResultMap("categoryMapping")
     Category UpdateCategory(@Param("category") CategoryRequest categoryRequest, UUID userId);
+
+
 }

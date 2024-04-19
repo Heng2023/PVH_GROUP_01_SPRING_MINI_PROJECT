@@ -105,7 +105,7 @@ public class CategoryController {
             return ResponseEntity.notFound().build();
         }
     }
-
+        //Insert
     @PostMapping
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -115,18 +115,20 @@ public class CategoryController {
 
         Category category = categoryService.addCategory(categoryRequest, currentUserId);
 
-        ApiResponse<?> response = ApiResponse.builder()
-                .message("You Created category successfully")
-                .payload(category)
-                .status(HttpStatus.CREATED)
-                .instance("/api/v1/categories")
-                .timestamp(new Date())
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                "about:blank",
+                "Category created successfully",
+                HttpStatus.CREATED,
+                HttpStatus.CREATED.value(),
+                "/api/v1/categories/" ,
+                new Date(),
+                null,
+                category
+        ));
     }
 
-   //Update
+
+    //Update
    @PutMapping("/{categoryId}")
    public ResponseEntity<?> updateCategory(@Valid @RequestBody CategoryRequest categoryRequest, @PathVariable UUID categoryId) {
        Authentication auth = SecurityContextHolder.getContext().getAuthentication();

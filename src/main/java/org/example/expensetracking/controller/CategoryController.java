@@ -93,7 +93,6 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
-
         ApiResponse<?> response = ApiResponse.builder()
                 .message("You deleted category successfully")
                 .status(HttpStatus.OK)

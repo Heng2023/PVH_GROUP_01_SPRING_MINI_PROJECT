@@ -58,17 +58,16 @@ public class ExpenseController {
     @GetMapping
     public ResponseEntity<?> getAllExpenses() {
         List<Expense> expenses = expenseService.findAllExpense();
-
-        ApiResponse<?> response = ApiResponse
-                .builder()
-                .message("Successfully get expense")
-                .payload(expenses)
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .timestamp(new Date())
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(
+                " About:Blank",
+                "You got exspense succesfully",
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "/api/v1/categories?page=",
+                new Date(),
+                null,
+                expenses
+        ));
     }
 
     @GetMapping("/{id}")
@@ -103,16 +102,16 @@ public class ExpenseController {
 
         Expense expense = expenseService.updateExpanse(userId, expenseRequest);
 
-        ApiResponse<?> response = ApiResponse
-                .builder()
-                .message("Successfully get expense")
-                .payload(expense)
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .timestamp(new Date())
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(
+                " About:Blank",
+                "You got exspense succesfully",
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "/api/v1/categories?page=",
+                new Date(),
+                null,
+                expense
+        ));
 
     }
 
@@ -125,12 +124,10 @@ public class ExpenseController {
 
         expenseService.deleteExpanse(userId, expenseId);
 
-        ApiResponse<?> response = ApiResponse
-                .builder()
-                .message("Successfully get expense")
-                .payload(null)
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
+        ApiResponse<?> response = ApiResponse.builder()
+                .message("You deleted expenses successfully")
+                .status(HttpStatus.OK)
+                .instance("/api/v1/expenses")
                 .timestamp(new Date())
                 .build();
 

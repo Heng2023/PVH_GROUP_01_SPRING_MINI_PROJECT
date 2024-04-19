@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.*;
 import org.example.expensetracking.configuration.UUIDTypeHandler;
 import org.example.expensetracking.model.User;
 import org.example.expensetracking.model.dto.request.RegisterRequest;
+import org.example.expensetracking.model.dto.response.UserResponse;
 
 
 import java.util.UUID;

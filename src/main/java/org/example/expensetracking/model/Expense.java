@@ -3,6 +3,8 @@ package org.example.expensetracking.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.expensetracking.model.dto.request.CategoryRequest;
+import org.example.expensetracking.model.dto.response.UserResponse;
 
 import java.util.Date;
 import java.util.UUID;
@@ -15,6 +17,6 @@ public class Expense {
     private int amount;
     private String description;
     private Date date;
-    private User userId;
-    private Category categoryId;
+    private User user;
+    private Category category;
 }

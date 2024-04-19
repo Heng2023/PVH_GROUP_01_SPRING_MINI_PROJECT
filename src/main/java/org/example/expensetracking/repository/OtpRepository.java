@@ -9,8 +9,8 @@ import java.util.UUID;
 @Mapper
 public interface OtpRepository {
     @Insert("""
-        INSERT INTO otps (otp_code, issued_at, expiration, user_id) 
-        VALUES (#{otpCode}, #{issuedAt}, #{expiration}, #{userId, jdbcType=OTHER}) 
+        INSERT INTO otps (otp_code, issued_at, expiration, user_id)
+        VALUES (#{otpCode}, #{issuedAt}, #{expiration}, #{userId, jdbcType=OTHER})
     """)
     void saveOtp(Otp otp);
 

@@ -1,5 +1,19 @@
 package org.example.expensetracking.service;
 
-public interface ExpenseService {
+import org.example.expensetracking.model.Expense;
+import org.example.expensetracking.model.dto.request.ExpenseRequest;
 
+import java.util.List;
+import java.util.UUID;
+
+public interface ExpenseService {
+    Expense insertExpense(ExpenseRequest expenseRequest, UUID userId);
+
+    List<Expense> findAllExpense();
+
+    Expense updateExpanse(UUID userId, ExpenseRequest expenseRequest);
+
+    void deleteExpanse(UUID userId, UUID expanseId);
+
+    Expense findExpenseById(UUID userId, UUID id);
 }

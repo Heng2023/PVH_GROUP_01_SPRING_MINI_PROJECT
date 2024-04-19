@@ -15,6 +15,8 @@ public interface UserRepository {
             @Result(property = "userId", column = "user_id",typeHandler = UUIDTypeHandler.class), // Map userId column to userId property
             @Result(property = "profileImage", column = "profile_image")
     })
+
+    //insert user
     @Select("""
         INSERT INTO users
         VALUES (DEFAULT,#{user.email} , #{user.password},#{user.profileImage})
@@ -22,6 +24,7 @@ public interface UserRepository {
     """)
     User saveUser(@Param("user") RegisterRequest registerRequest);
 
+    //get user by email
     @Select("""
         SELECT *
         FROM users
@@ -40,8 +43,10 @@ public interface UserRepository {
     """)
    User updatePasswordByEmail(@Param("email") String email, @Param("encodedPassword") String encodedPassword);
 
+    //get user by id
     @Select("""
-    SELECT * FROM users WHERE user_id = #{userId}
+    SELECT * FROM users 
+    WHERE user_id = #{userId}
     """)
     @ResultMap("UserMapping")
     User findUserById(UUID userId);

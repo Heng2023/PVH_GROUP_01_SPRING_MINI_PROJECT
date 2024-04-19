@@ -46,7 +46,7 @@ public interface ExpenseRepository {
     @Select("""
     SELECT * FROM expenses
     """)
-    @Results(id = "expanseMapping", value = {
+    @Results(id = "expanseMapping",value = {
             @Result(property = "expenseId", column = "expense_id"),
             @Result(property = "user", column = "user_id",
                     one = @One(select = "org.example.expensetracking.repository.UserRepository.findUserById")

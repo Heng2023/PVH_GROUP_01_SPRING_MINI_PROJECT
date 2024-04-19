@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Mapper
 public interface CategoryRepository {
-
+    //get all category
     @Select("""
        SELECT * FROM categories WHERE user_id = #{userId}
        LIMIT #{size}
@@ -24,13 +24,14 @@ public interface CategoryRepository {
     })
     List<Category> getAllCategories(UUID userId, Integer page, Integer size);
 
-
+    //get category by id
     @Select("""
     SELECT * FROM categories WHERE category_id = #{categoryId}
     AND user_id = #{userId}
     """)
-   Category getCategoryById(UUID categoryId,UUID userId);
+   Category getCategoryById( UUID categoryID,UUID userId);
 
+    //insert category
     @Select("""
     INSERT INTO categories (name, description, user_id)
     VALUES ( #{category.name}, #{category.description}, #{userId})
@@ -53,9 +54,11 @@ public interface CategoryRepository {
     """)
     void deleteCategory(UUID Id);
 
+    //get category by id category
     @Select("""
     SELECT * FROM categories
     WHERE category_id = #{categoryId}
-    """)
+""")
     Category findCategoryById(UUID categoryId);
+
 }
